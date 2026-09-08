@@ -25,9 +25,9 @@ export async function SectionElenco() {
   const fullMarquee = [...marqueeList, ...marqueeList];
 
   return (
-    <section id="elenco" className="py-24 bg-white overflow-hidden">
+    <section id="elenco" className="py-12 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-4xl font-extrabold text-[#001f3f] uppercase tracking-tight">Nosso Elenco</h2>
           <div className="w-24 h-1 bg-[#0074D9] mx-auto mt-4"></div>
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">A experiência de quem já viveu muito o futebol. Nosso time de mestres.</p>

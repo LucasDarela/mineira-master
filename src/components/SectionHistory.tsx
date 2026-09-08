@@ -1,6 +1,6 @@
 export function SectionHistory() {
   return (
-    <section id="historia" className="py-24 bg-[#001f3f] text-white">
+    <section id="historia" className="py-12 bg-[#001f3f] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>

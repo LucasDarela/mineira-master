@@ -11,9 +11,9 @@ export async function SectionAgenda() {
     .limit(6);
 
   return (
-    <section id="agenda" className="py-24 bg-[#f8f9fa]">
+    <section id="agenda" className="py-12 bg-[#f8f9fa]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-6">
           <h2 className="text-4xl font-extrabold text-[#001f3f] uppercase tracking-tight">
             Agenda de Jogos
           </h2>

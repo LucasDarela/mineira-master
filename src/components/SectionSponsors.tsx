@@ -13,7 +13,7 @@ export async function SectionSponsors() {
   ];
 
   return (
-    <section id="patrocinadores" className="py-20 bg-white">
+    <section id="patrocinadores" className="py-10 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-2xl font-bold text-gray-400 uppercase tracking-widest mb-10">
           Nossos Patrocinadores

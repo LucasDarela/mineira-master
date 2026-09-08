@@ -7,6 +7,7 @@ import { SectionDiretoria } from "@/components/SectionDiretoria";
 import { SectionComissao } from "@/components/SectionComissao";
 import { SectionHistory } from "@/components/SectionHistory";
 import { SectionSponsors } from "@/components/SectionSponsors";
+import { SectionSponsorsCarousel } from "@/components/SectionSponsorsCarousel";
 import { SectionInstagram } from "@/components/SectionInstagram";
 import { Footer } from "@/components/Footer";
 
@@ -16,13 +17,13 @@ export default function Home() {
       <Navbar />
       <Hero />
       <SectionNextGame />
+      <SectionSponsorsCarousel />
       <SectionAgenda />
       <SectionElenco />
       <SectionDiretoria />
       <SectionComissao />
       <SectionHistory />
       <SectionInstagram />
-      <SectionSponsors />
       <Footer />
     </main>
   );
