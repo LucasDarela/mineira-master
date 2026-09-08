@@ -43,18 +43,56 @@ export async function addGame(formData: FormData) {
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
   const location = formData.get("location") as string;
+  const home_or_away = formData.get("home_or_away") as string || "Casa";
   const is_championship = formData.get("is_championship") === "on";
-  const outcome = formData.get("outcome") as string || "";
-  const isAdminDomain = await getIsAdminDomain();
+  const referee = formData.get("referee") as string || null;
+  const highlight_player = formData.get("highlight_player") as string || null;
+  const opponent_goals = parseInt(formData.get("opponent_goals") as string) || 0;
   
-  const { error } = await supabase.from("games").insert([
-    { opponent, date, time, location, is_championship, outcome }
-  ]);
+  const goalsPlayersStr = formData.get("goals_players") as string;
+  const yellowCardsPlayersStr = formData.get("yellow_cards_players") as string;
+  const redCardsPlayersStr = formData.get("red_cards_players") as string;
+  
+  let goals_players: string[] = [];
+  let yellow_cards_players: string[] = [];
+  let red_cards_players: string[] = [];
+  
+  try { goals_players = JSON.parse(goalsPlayersStr || "[]"); } catch {}
+  try { yellow_cards_players = JSON.parse(yellowCardsPlayersStr || "[]"); } catch {}
+  try { red_cards_players = JSON.parse(redCardsPlayersStr || "[]"); } catch {}
 
-  if (error) {
-    console.error("Erro do Supabase ao inserir jogo:", error);
-  }
+  const yellow_cards_count = yellow_cards_players.length;
+  const red_cards_count = red_cards_players.length;
+  const goals_count = goals_players.length;
   
+  let outcome = "E";
+  if (goals_count > opponent_goals) outcome = "V";
+  else if (goals_count < opponent_goals) outcome = "D";
+
+  const { data: newGame, error } = await supabase.from("games").insert([{ 
+    opponent, 
+    date, 
+    time, 
+    location, 
+    home_or_away,
+    is_championship, 
+    outcome,
+    opponent_goals,
+    referee,
+    highlight_player,
+    yellow_cards_count,
+    red_cards_count,
+    goals_players,
+    yellow_cards_players,
+    red_cards_players
+  }]).select().single();
+
+  if (newGame) {
+    await changePlayerStats(supabase, goals_players, 'goals', 1);
+    await changePlayerStats(supabase, yellow_cards_players, 'yellow_cards', 1);
+    await changePlayerStats(supabase, red_cards_players, 'red_cards', 1);
+  }
+
   revalidatePath("/", "layout");
 }
 
@@ -74,19 +112,107 @@ export async function updateGame(id: string, formData: FormData) {
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
   const location = formData.get("location") as string;
+  const home_or_away = formData.get("home_or_away") as string || "Casa";
   const is_championship = formData.get("is_championship") === "on";
-  const outcome = formData.get("outcome") as string || "";
+  const referee = formData.get("referee") as string || null;
+  const highlight_player = formData.get("highlight_player") as string || null;
+  const opponent_goals = parseInt(formData.get("opponent_goals") as string) || 0;
   
-  await supabase.from("games").update({ opponent, date, time, location, is_championship, outcome }).eq("id", id);
+  const goalsPlayersStr = formData.get("goals_players") as string;
+  const yellowCardsPlayersStr = formData.get("yellow_cards_players") as string;
+  const redCardsPlayersStr = formData.get("red_cards_players") as string;
   
+  let goals_players: string[] = [];
+  let yellow_cards_players: string[] = [];
+  let red_cards_players: string[] = [];
+  
+  try { goals_players = JSON.parse(goalsPlayersStr || "[]"); } catch {}
+  try { yellow_cards_players = JSON.parse(yellowCardsPlayersStr || "[]"); } catch {}
+  try { red_cards_players = JSON.parse(redCardsPlayersStr || "[]"); } catch {}
+
+  const yellow_cards_count = yellow_cards_players.length;
+  const red_cards_count = red_cards_players.length;
+  const goals_count = goals_players.length;
+  
+  let outcome = "E";
+  if (goals_count > opponent_goals) outcome = "V";
+  else if (goals_count < opponent_goals) outcome = "D";
+  
+  // Buscar o jogo antigo para reverter as estatísticas
+  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players").eq("id", id).single();
+  
+  if (oldGame) {
+    await changePlayerStats(supabase, oldGame.goals_players || [], 'goals', -1);
+    await changePlayerStats(supabase, oldGame.yellow_cards_players || [], 'yellow_cards', -1);
+    await changePlayerStats(supabase, oldGame.red_cards_players || [], 'red_cards', -1);
+  }
+  
+  const { data: updatedGame, error: updateError } = await supabase.from("games").update({ 
+    opponent, 
+    date, 
+    time, 
+    location, 
+    home_or_away,
+    is_championship, 
+    outcome,
+    opponent_goals,
+    referee,
+    highlight_player,
+    yellow_cards_count,
+    red_cards_count,
+    goals_players,
+    yellow_cards_players,
+    red_cards_players
+  }).eq("id", id).select().single();
+  
+  if (updateError) {
+    const fs = require('fs');
+    fs.writeFileSync('error_log.txt', JSON.stringify({ updateError, data: { opponent, referee, is_championship, goals_players } }, null, 2));
+  }
+  
+  console.log("UPDATE RESULT:", updatedGame, updateError);
+
+  console.log("CHANGING STATS UP", { goals_players, yellow_cards_players, red_cards_players });
+  await changePlayerStats(supabase, goals_players, 'goals', 1);
+  await changePlayerStats(supabase, yellow_cards_players, 'yellow_cards', 1);
+  await changePlayerStats(supabase, red_cards_players, 'red_cards', 1);
+
   revalidatePath("/", "layout");
 }
 
 export async function deleteGame(id: string) {
   const supabase = await createClient();
+  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players").eq("id", id).single();
+  
+  if (oldGame) {
+    await changePlayerStats(supabase, oldGame.goals_players || [], 'goals', -1);
+    await changePlayerStats(supabase, oldGame.yellow_cards_players || [], 'yellow_cards', -1);
+    await changePlayerStats(supabase, oldGame.red_cards_players || [], 'red_cards', -1);
+  }
+
   await supabase.from("games").delete().eq("id", id);
   
   revalidatePath("/", "layout");
+}
+
+async function changePlayerStats(supabase: any, playerIds: string[], statColumn: string, change: number) {
+  if (!playerIds || playerIds.length === 0) return;
+  
+  const counts = playerIds.reduce((acc, id) => {
+    acc[id] = (acc[id] || 0) + change;
+    return acc;
+  }, {} as Record<string, number>);
+
+  for (const [id, countChange] of Object.entries(counts)) {
+    if (countChange === 0) continue;
+    const { data, error } = await supabase.from('players').select(statColumn).eq('id', id).single();
+    console.log(`FETCHED PLAYER ${id} STAT ${statColumn}:`, data, error);
+    if (data) {
+      const newVal = Math.max(0, (data[statColumn] || 0) + countChange);
+      const { error: updErr } = await supabase.from('players').update({ [statColumn]: newVal }).eq('id', id);
+      console.log(`UPDATED PLAYER ${id} TO ${newVal}, error:`, updErr);
+    }
+  }
 }
 
 export async function uploadImageToStorage(file: File | null) {
@@ -129,10 +255,22 @@ export async function addPlayer(formData: FormData) {
   const position = formData.get("position") as string;
   const jersey_number = formData.get("jersey_number") as string || "";
   
+  const entry_year = formData.get("entry_year") as string || null;
+  const birthplace = formData.get("birthplace") as string || null;
+  const birth_date = formData.get("birth_date") as string || null;
+  const height = formData.get("height") as string || null;
+  const weight = formData.get("weight") as string || null;
+  const yellow_cards = parseInt(formData.get("yellow_cards") as string || "0");
+  const red_cards = parseInt(formData.get("red_cards") as string || "0");
+  const goals = parseInt(formData.get("goals") as string || "0");
+  
   const file = formData.get("image") as File;
   const image = await uploadImageToStorage(file) || "/images/player.jpg";
   
-  await supabase.from("players").insert([{ name, position, jersey_number, image }]);
+  await supabase.from("players").insert([{ 
+    name, position, jersey_number, image, 
+    entry_year, birthplace, birth_date, height, weight, yellow_cards, red_cards, goals 
+  }]);
   revalidatePath("/", "layout");
 }
 
@@ -142,7 +280,19 @@ export async function updatePlayer(id: string, formData: FormData) {
   const position = formData.get("position") as string;
   const jersey_number = formData.get("jersey_number") as string || "";
   
-  const updateData: any = { name, position, jersey_number };
+  const entry_year = formData.get("entry_year") as string || null;
+  const birthplace = formData.get("birthplace") as string || null;
+  const birth_date = formData.get("birth_date") as string || null;
+  const height = formData.get("height") as string || null;
+  const weight = formData.get("weight") as string || null;
+  const yellow_cards = parseInt(formData.get("yellow_cards") as string || "0");
+  const red_cards = parseInt(formData.get("red_cards") as string || "0");
+  const goals = parseInt(formData.get("goals") as string || "0");
+  
+  const updateData: any = { 
+    name, position, jersey_number, 
+    entry_year, birthplace, birth_date, height, weight, yellow_cards, red_cards, goals 
+  };
   const file = formData.get("image") as File;
   const uploadedImage = await uploadImageToStorage(file);
   if (uploadedImage) updateData.image = uploadedImage;

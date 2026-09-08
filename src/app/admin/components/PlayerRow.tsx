@@ -32,8 +32,15 @@ export function PlayerRow({ player }: { player: any }) {
                   <option value="Goleiro">Goleiro</option>
                   <option value="Zagueiro">Zagueiro</option>
                   <option value="Lateral">Lateral</option>
+                  <option value="Lateral Direito">Lateral Direito</option>
+                  <option value="Lateral Esquerdo">Lateral Esquerdo</option>
+                  <option value="Volante">Volante</option>
+                  <option value="Cabeça de Área">Cabeça de Área</option>
                   <option value="Meio-Campo">Meio-Campo</option>
+                  <option value="Meia-Atacante">Meia-Atacante</option>
+                  <option value="Ponta">Ponta</option>
                   <option value="Atacante">Atacante</option>
+                  <option value="Centroavante">Centroavante</option>
                   <option value="Técnico">Técnico</option>
                   <option value="Diretoria">Diretoria</option>
                 </select>
@@ -45,6 +52,46 @@ export function PlayerRow({ player }: { player: any }) {
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase">Nova Foto</label>
                 <input type="file" name="image" accept="image/*" className="w-full p-1 border rounded text-sm bg-white" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">Entrada no Clube</label>
+                <input type="date" name="entry_year" defaultValue={player.entry_year || ""} className="w-full p-2 border rounded text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">Naturalidade</label>
+                <input type="text" name="birthplace" defaultValue={player.birthplace} className="w-full p-2 border rounded text-sm" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">Data Nasc.</label>
+                <input type="date" name="birth_date" defaultValue={player.birth_date} className="w-full p-2 border rounded text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">Altura / Peso</label>
+                <div className="flex gap-2">
+                  <input type="text" name="height" defaultValue={player.height} placeholder="Alt" className="w-full p-2 border rounded text-sm" />
+                  <input type="text" name="weight" defaultValue={player.weight} placeholder="Peso" className="w-full p-2 border rounded text-sm" />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">C. Amarelos</label>
+                <input type="number" name="yellow_cards" defaultValue={player.yellow_cards || 0} className="w-full p-2 border rounded text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">C. Vermelhos</label>
+                <input type="number" name="red_cards" defaultValue={player.red_cards || 0} className="w-full p-2 border rounded text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">Gols Marcados</label>
+                <input type="number" name="goals" defaultValue={player.goals || 0} className="w-full p-2 border rounded text-sm" />
               </div>
             </div>
             

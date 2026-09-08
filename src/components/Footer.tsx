@@ -1,4 +1,4 @@
-import { Link as LinkIcon, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 
 export function Footer() {
@@ -60,17 +60,36 @@ export function Footer() {
               Contato
             </h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <MapPin className="text-[#38bdf8] shrink-0" size={20} />
-                <span>Criciúma, SC, Brasil</span>
+              <li className="flex items-center gap-3">
+                <MapPin className="text-[#0074D9]" size={24} />
+                <a
+                  href="https://maps.app.goo.gl/A598vQoi2L2KxV8s8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Cidade Mineira, Criciúma - SC
+                </a>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="text-[#38bdf8] shrink-0" size={20} />
-                <span>(48) 99610-3002</span>
+                <Phone className="text-[#0074D9]" size={24} />
+                <a
+                  href="https://wa.me/5548996103002"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  (48) 99610-3002
+                </a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="text-[#38bdf8] shrink-0" size={20} />
-                <span>contato@mineiramaster.com.br</span>
+                <Mail className="text-[#0074D9]" size={24} />
+                <a
+                  href="mailto:contato@mineiramaster.com.br"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  contato@mineiramaster.com.br
+                </a>
               </li>
             </ul>
           </div>
@@ -81,22 +100,26 @@ export function Footer() {
             </h4>
             <div className="flex gap-4">
               <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#38bdf8] hover:text-white transition-all"
+                href="https://www.instagram.com/mineiramaster/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#0074D9] hover:text-white transition-all text-gray-400"
               >
-                <LinkIcon size={20} />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#38bdf8] hover:text-white transition-all"
-              >
-                <LinkIcon size={20} />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#38bdf8] hover:text-white transition-all"
-              >
-                <LinkIcon size={20} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
               </a>
             </div>
           </div>
@@ -104,7 +127,18 @@ export function Footer() {
 
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
           <p>&copy; 2026 Mineira Master. Todos os direitos reservados.</p>
-          <p className="mt-2 md:mt-0">Desenvolvido por Loading Tecnology.</p>
+          <p className="mt-2 md:mt-0">
+            Desenvolvido por{" "}
+            <a
+              href="https://loadingtechnology.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" hover:text-[#0074D9] transition-colors"
+            >
+              Loading Technology
+            </a>
+            .
+          </p>
         </div>
       </div>
     </footer>

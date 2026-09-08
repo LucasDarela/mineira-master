@@ -44,41 +44,42 @@ export default function Contato() {
               </p>
 
               <div className="space-y-6">
-                <div className="flex items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <div className="w-14 h-14 bg-[#0074D9]/10 rounded-full flex items-center justify-center shrink-0">
-                    <MapPin className="text-[#0074D9]" size={28} />
+                {/* Endereço */}
+                <a href="https://maps.app.goo.gl/A598vQoi2L2KxV8s8" target="_blank" rel="noopener noreferrer" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start gap-6 hover:shadow-md transition-shadow cursor-pointer">
+                  <div className="w-14 h-14 bg-[#e6f2ff] text-[#0074D9] rounded-full flex items-center justify-center shrink-0">
+                    <MapPin size={28} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#001f3f]">Endereço</h4>
-                    <p className="text-gray-600">
-                      Criciúma, Santa Catarina, Brasil
-                    </p>
+                    <h3 className="font-bold text-[#001f3f] text-lg mb-2">
+                      Endereço
+                    </h3>
+                    <p className="text-gray-600">Cidade Mineira, Criciúma - SC</p>
                   </div>
-                </div>
+                </a>
 
-                <div className="flex items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <div className="w-14 h-14 bg-[#0074D9]/10 rounded-full flex items-center justify-center shrink-0">
-                    <Phone className="text-[#0074D9]" size={28} />
+                {/* Telefone */}
+                <a href="https://wa.me/5548996103002" target="_blank" rel="noopener noreferrer" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start gap-6 hover:shadow-md transition-shadow cursor-pointer">
+                  <div className="w-14 h-14 bg-[#e6f2ff] text-[#0074D9] rounded-full flex items-center justify-center shrink-0">
+                    <Phone size={28} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#001f3f]">
+                    <h3 className="font-bold text-[#001f3f] text-lg mb-2">
                       Telefone / WhatsApp
-                    </h4>
+                    </h3>
                     <p className="text-gray-600">(48) 99610-3002</p>
                   </div>
-                </div>
+                </a>
 
-                <div className="flex items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <div className="w-14 h-14 bg-[#0074D9]/10 rounded-full flex items-center justify-center shrink-0">
-                    <Mail className="text-[#0074D9]" size={28} />
+                {/* E-mail */}
+                <a href="mailto:contato@mineiramaster.com.br" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-start gap-6 hover:shadow-md transition-shadow cursor-pointer">
+                  <div className="w-14 h-14 bg-[#e6f2ff] text-[#0074D9] rounded-full flex items-center justify-center shrink-0">
+                    <Mail size={28} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#001f3f]">E-mail</h4>
-                    <p className="text-gray-600">
-                      contato@mineiramaster.com.br
-                    </p>
+                    <h3 className="font-bold text-[#001f3f] text-lg mb-2">E-mail</h3>
+                    <p className="text-gray-600">contato@mineiramaster.com.br</p>
                   </div>
-                </div>
+                </a>
               </div>
             </div>
 

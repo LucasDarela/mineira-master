@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, MapPin } from "lucide-react";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +51,8 @@ export function Navbar() {
                 width={80}
                 height={80}
                 className="h-16 w-auto"
+                loading="eager"
+                priority
               />
             </Link>
           </div>
@@ -92,6 +94,18 @@ export function Navbar() {
                   )}
                 </div>
               ))}
+              
+              <div className="pl-4 border-l border-gray-200">
+                <a
+                  href="https://maps.app.goo.gl/A598vQoi2L2KxV8s8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Localização do Campo"
+                  className="flex items-center text-red-500 hover:text-red-700 transition-colors p-2 rounded-full hover:bg-red-50"
+                >
+                  <MapPin size={24} />
+                </a>
+              </div>
             </div>
           </div>
 
@@ -154,6 +168,17 @@ export function Navbar() {
                 )}
               </div>
             ))}
+            
+            {/* Map Link Mobile */}
+            <a
+              href="https://maps.app.goo.gl/A598vQoi2L2KxV8s8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-red-600 hover:bg-gray-50 px-3 py-3 rounded-md text-base font-bold uppercase"
+            >
+              <MapPin size={20} />
+              Campo do Mineira
+            </a>
           </div>
         </div>
       )}

@@ -1,30 +1,84 @@
 import { createClient } from "@/utils/supabase/server";
-import { addGame, logout, addPlayer, addDirector, addStaff, addSponsor } from "./actions";
-import { LogOut, Users, CalendarDays, Briefcase, ClipboardList, MonitorPlay } from "lucide-react";
+import {
+  addGame,
+  logout,
+  addPlayer,
+  addDirector,
+  addStaff,
+  addSponsor,
+} from "./actions";
+import {
+  LogOut,
+  Users,
+  CalendarDays,
+  Briefcase,
+  ClipboardList,
+  MonitorPlay,
+} from "lucide-react";
 import { GameRow } from "./components/GameRow";
 import { PlayerRow } from "./components/PlayerRow";
 import { DirectorRow } from "./components/DirectorRow";
 import { StaffRow } from "./components/StaffRow";
 import { SponsorRow } from "./components/SponsorRow";
 import { LocationInput } from "./components/LocationInput";
+import { SearchFilter } from "./components/SearchFilter";
+import { GameEventsEditor } from "./components/GameEventsEditor";
 
-export default async function AdminPage(props: { searchParams: Promise<{ tab?: string }> }) {
+export default async function AdminPage(props: {
+  searchParams: Promise<{ tab?: string; q?: string }>;
+}) {
   const supabase = await createClient();
   const searchParams = await props.searchParams;
   const currentTab = searchParams?.tab || "jogos";
+  const q = searchParams?.q?.toLowerCase() || "";
 
-  const { data: games } = await supabase.from("games").select("*").order("date", { ascending: false });
-  const { data: players } = await supabase.from("players").select("*").order("name", { ascending: true });
-  const { data: directors } = await supabase.from("directors").select("*").order("name", { ascending: true });
-  const { data: staff } = await supabase.from("staff").select("*").order("name", { ascending: true });
-  const { data: sponsors } = await supabase.from("sponsors").select("*").order("name", { ascending: true });
+  let { data: games } = await supabase
+    .from("games")
+    .select("*")
+    .order("date", { ascending: false });
+  let { data: players } = await supabase
+    .from("players")
+    .select("*")
+    .order("name", { ascending: true });
+  let { data: directors } = await supabase
+    .from("directors")
+    .select("*")
+    .order("name", { ascending: true });
+  let { data: staff } = await supabase
+    .from("staff")
+    .select("*")
+    .order("name", { ascending: true });
+  let { data: sponsors } = await supabase
+    .from("sponsors")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (q) {
+    if (games)
+      games = games.filter((g: any) => g.opponent.toLowerCase().includes(q));
+    if (players)
+      players = players.filter((p: any) => p.name.toLowerCase().includes(q));
+    if (directors)
+      directors = directors.filter((d: any) =>
+        d.name.toLowerCase().includes(q),
+      );
+    if (staff)
+      staff = staff.filter((s: any) => s.name.toLowerCase().includes(q));
+    if (sponsors)
+      sponsors = sponsors.filter((s: any) => s.name.toLowerCase().includes(q));
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-black">
       <header className="bg-[#001f3f] text-white p-4 shadow-md flex justify-between items-center">
-        <h1 className="text-xl font-bold uppercase">Administração - Mineira Master</h1>
+        <h1 className="text-xl font-bold uppercase">
+          Administração - Mineira Master
+        </h1>
         <form action={logout}>
-          <button type="submit" className="flex items-center gap-2 hover:text-[#0074D9] transition-colors text-sm font-semibold">
+          <button
+            type="submit"
+            className="flex items-center gap-2 hover:text-[#0074D9] transition-colors text-sm font-semibold"
+          >
             <LogOut size={16} /> Sair
           </button>
         </form>
@@ -33,32 +87,32 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
       {/* Navegação de Abas */}
       <div className="max-w-7xl mx-auto px-6 mt-6">
         <div className="flex border-b border-gray-200 overflow-x-auto hide-scrollbar">
-          <a 
-            href="?tab=jogos" 
+          <a
+            href="?tab=jogos"
             className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "jogos" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
           >
             <CalendarDays size={18} /> Jogos
           </a>
-          <a 
-            href="?tab=elenco" 
+          <a
+            href="?tab=elenco"
             className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "elenco" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
           >
             <Users size={18} /> Elenco
           </a>
-          <a 
-            href="?tab=diretoria" 
+          <a
+            href="?tab=diretoria"
             className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "diretoria" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
           >
             <Briefcase size={18} /> Diretoria
           </a>
-          <a 
-            href="?tab=comissao" 
+          <a
+            href="?tab=comissao"
             className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "comissao" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
           >
             <ClipboardList size={18} /> Comissão
           </a>
-          <a 
-            href="?tab=patrocinadores" 
+          <a
+            href="?tab=patrocinadores"
             className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "patrocinadores" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
           >
             <MonitorPlay size={18} /> Patrocinadores
@@ -67,54 +121,150 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
       </div>
 
       <main className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
         {/* ABA JOGOS */}
         {currentTab === "jogos" && (
           <>
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Adicionar Novo Jogo</h2>
+              <details className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 group lg:open">
+                <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
+                  Adicionar Novo Jogo
+                  <span className="transition group-open:rotate-180">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
                 <form action={addGame} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Oponente</label>
-                    <input type="text" name="opponent" required className="w-full p-2 border rounded" placeholder="Ex: Amigos FC" />
+                    <label className="block text-sm font-medium mb-1">
+                      Oponente
+                    </label>
+                    <input
+                      type="text"
+                      name="opponent"
+                      required
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: Amigos FC"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Data</label>
-                    <input type="date" name="date" required className="w-full p-2 border rounded" />
+                    <label className="block text-sm font-medium mb-1">
+                      Data
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      required
+                      className="w-full p-2 border rounded"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Horário</label>
-                    <input type="time" name="time" required className="w-full p-2 border rounded" />
+                    <label className="block text-sm font-medium mb-1">
+                      Horário
+                    </label>
+                    <input
+                      type="time"
+                      name="time"
+                      required
+                      className="w-full p-2 border rounded"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Local</label>
+                    <label className="block text-sm font-medium mb-1">
+                      Mando de Campo
+                    </label>
+                    <select
+                      name="home_or_away"
+                      className="w-full p-2 border rounded"
+                      required
+                    >
+                      <option value="Casa">Casa</option>
+                      <option value="Fora">Fora</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Local
+                    </label>
                     <LocationInput />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" name="is_championship" id="is_championship" className="w-4 h-4" />
-                    <label htmlFor="is_championship" className="text-sm font-medium">É jogo de Campeonato?</label>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Árbitro
+                    </label>
+                    <input
+                      type="text"
+                      name="referee"
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: Anderson Daronco"
+                    />
                   </div>
-                  <button type="submit" className="w-full bg-[#0074D9] hover:bg-[#005bb5] text-white font-bold py-2 px-4 rounded transition-colors">
+
+                  {/* Os eventos da partida (gols, cartões, destaque) foram movidos apenas para a Edição */}
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      name="is_championship"
+                      id="is_championship"
+                      className="w-4 h-4"
+                    />
+                    <label
+                      htmlFor="is_championship"
+                      className="text-sm font-medium"
+                    >
+                      É jogo de Campeonato?
+                    </label>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-[#0074D9] hover:bg-[#005bb5] text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
                     Salvar Jogo
                   </button>
                 </form>
-              </div>
+              </details>
             </div>
 
             <div className="lg:col-span-2">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Jogos Cadastrados</h2>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 border-b pb-2 gap-2">
+                  <h2 className="text-lg font-bold text-[#001f3f]">
+                    Jogos Cadastrados
+                  </h2>
+                  <div className="w-full sm:w-64">
+                    <SearchFilter placeholder="Buscar por adversário..." />
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 text-sm uppercase text-gray-600">
-                      <tr><th className="p-3">Data</th><th className="p-3">Adversário</th><th className="p-3">Resultado</th><th className="p-3 text-center">Ações</th></tr>
+                      <tr>
+                        <th className="p-3">Data/Hora</th>
+                        <th className="p-3 text-center">Partida</th>
+                        <th className="p-3 text-center">Desfecho</th>
+                        <th className="p-3 text-center">Ações</th>
+                      </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {(!games || games.length === 0) && (
-                        <tr><td colSpan={4} className="p-4 text-center text-gray-500">Nenhum jogo cadastrado.</td></tr>
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="p-4 text-center text-gray-500"
+                          >
+                            Nenhum jogo cadastrado.
+                          </td>
+                        </tr>
                       )}
-                      {games?.map((game) => <GameRow key={game.id} game={game} />)}
+                      {games?.map((game) => (
+                        <GameRow
+                          key={game.id}
+                          game={game}
+                          players={
+                            players?.map((p) => ({ id: p.id, name: p.name })) ||
+                            []
+                          }
+                        />
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -127,54 +277,207 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
         {currentTab === "elenco" && (
           <>
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Adicionar Jogador</h2>
+              <details className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 group lg:open">
+                <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
+                  Adicionar Jogador
+                  <span className="transition group-open:rotate-180">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
                 {/* IMPORTANTE: encType="multipart/form-data" para upload de arquivos */}
                 <form action={addPlayer} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Nome Completo</label>
-                    <input type="text" name="name" required className="w-full p-2 border rounded" placeholder="Ex: João Silva" />
+                    <label className="block text-sm font-medium mb-1">
+                      Nome Completo
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: João Silva"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Posição</label>
-                    <select name="position" required className="w-full p-2 border rounded">
+                    <label className="block text-sm font-medium mb-1">
+                      Posição
+                    </label>
+                    <select
+                      name="position"
+                      required
+                      className="w-full p-2 border rounded"
+                    >
                       <option value="Goleiro">Goleiro</option>
                       <option value="Zagueiro">Zagueiro</option>
                       <option value="Lateral">Lateral</option>
+                      <option value="Lateral Direito">Lateral Direito</option>
+                      <option value="Lateral Esquerdo">Lateral Esquerdo</option>
+                      <option value="Volante">Volante</option>
+                      <option value="Cabeça de Área">Cabeça de Área</option>
                       <option value="Meio-Campo">Meio-Campo</option>
+                      <option value="Meia-Atacante">Meia-Atacante</option>
+                      <option value="Ponta">Ponta</option>
                       <option value="Atacante">Atacante</option>
+                      <option value="Centroavante">Centroavante</option>
                       <option value="Técnico">Técnico</option>
                       <option value="Diretoria">Diretoria</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Nº Camisa</label>
-                    <input type="text" name="jersey_number" className="w-full p-2 border rounded" placeholder="Ex: 10" />
+                    <label className="block text-sm font-medium mb-1">
+                      Nº Camisa
+                    </label>
+                    <input
+                      type="text"
+                      name="jersey_number"
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: 10"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Entrada no Clube
+                      </label>
+                      <input
+                        type="date"
+                        name="entry_year"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Naturalidade
+                      </label>
+                      <input
+                        type="text"
+                        name="birthplace"
+                        className="w-full p-2 border rounded"
+                        placeholder="Ex: São Paulo (SP)"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Data de Nasc.
+                      </label>
+                      <input
+                        type="date"
+                        name="birth_date"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Altura
+                      </label>
+                      <input
+                        type="text"
+                        name="height"
+                        className="w-full p-2 border rounded"
+                        placeholder="Ex: 1,80m"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Peso
+                      </label>
+                      <input
+                        type="text"
+                        name="weight"
+                        className="w-full p-2 border rounded"
+                        placeholder="Ex: 75kg"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        C. Amarelos
+                      </label>
+                      <input
+                        type="number"
+                        name="yellow_cards"
+                        defaultValue="0"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        C. Vermelhos
+                      </label>
+                      <input
+                        type="number"
+                        name="red_cards"
+                        defaultValue="0"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Gols Marcados
+                      </label>
+                      <input
+                        type="number"
+                        name="goals"
+                        defaultValue="0"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Foto</label>
-                    <input type="file" name="image" accept="image/*" className="w-full p-2 border rounded bg-white text-sm" />
+                    <label className="block text-sm font-medium mb-1">
+                      Foto
+                    </label>
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      className="w-full p-2 border rounded bg-white text-sm"
+                    />
                   </div>
-                  <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                  <button
+                    type="submit"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
                     Adicionar Jogador
                   </button>
                 </form>
-              </div>
+              </details>
             </div>
 
             <div className="lg:col-span-2">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Jogadores Cadastrados ({players?.length || 0})</h2>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 border-b pb-2 gap-2">
+                  <h2 className="text-lg font-bold text-[#001f3f]">
+                    Jogadores Cadastrados ({players?.length || 0})
+                  </h2>
+                  <div className="w-full sm:w-64">
+                    <SearchFilter placeholder="Buscar jogador..." />
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 text-sm uppercase text-gray-600">
-                      <tr><th className="p-3">Nome</th><th className="p-3">Posição</th><th className="p-3 text-center">Ações</th></tr>
+                      <tr>
+                        <th className="p-3">Nome</th>
+                        <th className="p-3">Posição</th>
+                        <th className="p-3 text-center">Ações</th>
+                      </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {(!players || players.length === 0) && (
-                        <tr><td colSpan={3} className="p-4 text-center text-gray-500">Nenhum jogador cadastrado.</td></tr>
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className="p-4 text-center text-gray-500"
+                          >
+                            Nenhum jogador cadastrado.
+                          </td>
+                        </tr>
                       )}
-                      {players?.map((player) => <PlayerRow key={player.id} player={player} />)}
+                      {players?.map((player) => (
+                        <PlayerRow key={player.id} player={player} />
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -187,40 +490,90 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
         {currentTab === "diretoria" && (
           <>
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Adicionar Diretor</h2>
+              <details className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 group lg:open">
+                <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
+                  Adicionar Diretor
+                  <span className="transition group-open:rotate-180">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
                 <form action={addDirector} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Nome Completo</label>
-                    <input type="text" name="name" required className="w-full p-2 border rounded" />
+                    <label className="block text-sm font-medium mb-1">
+                      Nome Completo
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      className="w-full p-2 border rounded"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Cargo</label>
-                    <input type="text" name="role" required className="w-full p-2 border rounded" placeholder="Ex: Presidente" />
+                    <label className="block text-sm font-medium mb-1">
+                      Cargo
+                    </label>
+                    <input
+                      type="text"
+                      name="role"
+                      required
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: Presidente"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Foto</label>
-                    <input type="file" name="image" accept="image/*" className="w-full p-2 border rounded bg-white text-sm" />
+                    <label className="block text-sm font-medium mb-1">
+                      Foto
+                    </label>
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      className="w-full p-2 border rounded bg-white text-sm"
+                    />
                   </div>
-                  <button type="submit" className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
                     Salvar Diretor
                   </button>
                 </form>
-              </div>
+              </details>
             </div>
             <div className="lg:col-span-2">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Membros da Diretoria ({directors?.length || 0})</h2>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 border-b pb-2 gap-2">
+                  <h2 className="text-lg font-bold text-[#001f3f]">
+                    Membros da Diretoria ({directors?.length || 0})
+                  </h2>
+                  <div className="w-full sm:w-64">
+                    <SearchFilter placeholder="Buscar diretor..." />
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 text-sm uppercase text-gray-600">
-                      <tr><th className="p-3">Nome</th><th className="p-3">Cargo</th><th className="p-3 text-center">Ações</th></tr>
+                      <tr>
+                        <th className="p-3">Nome</th>
+                        <th className="p-3">Cargo</th>
+                        <th className="p-3 text-center">Ações</th>
+                      </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {(!directors || directors.length === 0) && (
-                        <tr><td colSpan={3} className="p-4 text-center text-gray-500">Nenhum diretor cadastrado.</td></tr>
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className="p-4 text-center text-gray-500"
+                          >
+                            Nenhum diretor cadastrado.
+                          </td>
+                        </tr>
                       )}
-                      {directors?.map((dir) => <DirectorRow key={dir.id} director={dir} />)}
+                      {directors?.map((dir) => (
+                        <DirectorRow key={dir.id} director={dir} />
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -233,40 +586,90 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
         {currentTab === "comissao" && (
           <>
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Adicionar Membro (Comissão)</h2>
+              <details className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 group lg:open">
+                <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
+                  Adicionar Membro (Comissão)
+                  <span className="transition group-open:rotate-180">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
                 <form action={addStaff} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Nome Completo</label>
-                    <input type="text" name="name" required className="w-full p-2 border rounded" />
+                    <label className="block text-sm font-medium mb-1">
+                      Nome Completo
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      className="w-full p-2 border rounded"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Cargo</label>
-                    <input type="text" name="role" required className="w-full p-2 border rounded" placeholder="Ex: Treinador" />
+                    <label className="block text-sm font-medium mb-1">
+                      Cargo
+                    </label>
+                    <input
+                      type="text"
+                      name="role"
+                      required
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: Treinador"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Foto</label>
-                    <input type="file" name="image" accept="image/*" className="w-full p-2 border rounded bg-white text-sm" />
+                    <label className="block text-sm font-medium mb-1">
+                      Foto
+                    </label>
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      className="w-full p-2 border rounded bg-white text-sm"
+                    />
                   </div>
-                  <button type="submit" className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
                     Salvar Membro
                   </button>
                 </form>
-              </div>
+              </details>
             </div>
             <div className="lg:col-span-2">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Membros da Comissão ({staff?.length || 0})</h2>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 border-b pb-2 gap-2">
+                  <h2 className="text-lg font-bold text-[#001f3f]">
+                    Membros da Comissão ({staff?.length || 0})
+                  </h2>
+                  <div className="w-full sm:w-64">
+                    <SearchFilter placeholder="Buscar membro..." />
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 text-sm uppercase text-gray-600">
-                      <tr><th className="p-3">Nome</th><th className="p-3">Cargo</th><th className="p-3 text-center">Ações</th></tr>
+                      <tr>
+                        <th className="p-3">Nome</th>
+                        <th className="p-3">Cargo</th>
+                        <th className="p-3 text-center">Ações</th>
+                      </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {(!staff || staff.length === 0) && (
-                        <tr><td colSpan={3} className="p-4 text-center text-gray-500">Nenhum membro cadastrado.</td></tr>
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className="p-4 text-center text-gray-500"
+                          >
+                            Nenhum membro cadastrado.
+                          </td>
+                        </tr>
                       )}
-                      {staff?.map((st) => <StaffRow key={st.id} staffMember={st} />)}
+                      {staff?.map((st) => (
+                        <StaffRow key={st.id} staffMember={st} />
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -279,40 +682,90 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
         {currentTab === "patrocinadores" && (
           <>
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Adicionar Patrocinador</h2>
+              <details className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 group lg:open">
+                <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
+                  Adicionar Patrocinador
+                  <span className="transition group-open:rotate-180">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
                 <form action={addSponsor} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Nome do Patrocinador</label>
-                    <input type="text" name="name" required className="w-full p-2 border rounded" placeholder="Ex: Supermercado XYZ" />
+                    <label className="block text-sm font-medium mb-1">
+                      Nome do Patrocinador
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: Supermercado XYZ"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Site / Link (Opcional)</label>
-                    <input type="url" name="url" className="w-full p-2 border rounded" placeholder="Ex: https://www.exemplo.com.br" />
+                    <label className="block text-sm font-medium mb-1">
+                      Site / Link (Opcional)
+                    </label>
+                    <input
+                      type="url"
+                      name="url"
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: https://www.exemplo.com.br"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Logo (Imagem)</label>
-                    <input type="file" name="image" accept="image/*" required className="w-full p-2 border rounded bg-white text-sm" />
+                    <label className="block text-sm font-medium mb-1">
+                      Logo (Imagem)
+                    </label>
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      required
+                      className="w-full p-2 border rounded bg-white text-sm"
+                    />
                   </div>
-                  <button type="submit" className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
                     Salvar Patrocinador
                   </button>
                 </form>
-              </div>
+              </details>
             </div>
             <div className="lg:col-span-2">
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="text-lg font-bold text-[#001f3f] mb-4 border-b pb-2">Patrocinadores Cadastrados ({sponsors?.length || 0})</h2>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 border-b pb-2 gap-2">
+                  <h2 className="text-lg font-bold text-[#001f3f]">
+                    Patrocinadores Cadastrados ({sponsors?.length || 0})
+                  </h2>
+                  <div className="w-full sm:w-64">
+                    <SearchFilter placeholder="Buscar patrocinador..." />
+                  </div>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 text-sm uppercase text-gray-600">
-                      <tr><th className="p-3">Nome / Logo</th><th className="p-3 text-center">Ações</th></tr>
+                      <tr>
+                        <th className="p-3">Nome / Logo</th>
+                        <th className="p-3 text-center">Ações</th>
+                      </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {(!sponsors || sponsors.length === 0) && (
-                        <tr><td colSpan={2} className="p-4 text-center text-gray-500">Nenhum patrocinador cadastrado.</td></tr>
+                        <tr>
+                          <td
+                            colSpan={2}
+                            className="p-4 text-center text-gray-500"
+                          >
+                            Nenhum patrocinador cadastrado.
+                          </td>
+                        </tr>
                       )}
-                      {sponsors?.map((st) => <SponsorRow key={st.id} sponsor={st} />)}
+                      {sponsors?.map((st) => (
+                        <SponsorRow key={st.id} sponsor={st} />
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -320,7 +773,6 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
             </div>
           </>
         )}
-
       </main>
     </div>
   );

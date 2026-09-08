@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function ElencoPage() {
   const supabase = await createClient();
@@ -26,7 +27,7 @@ export default async function ElencoPage() {
   }, {} as Record<string, any[]>);
 
   // Ordem de exibição em campo
-  const positionOrder = ["Goleiro", "Zagueiro", "Lateral", "Meio-Campo", "Atacante"];
+  const positionOrder = ["Goleiro", "Zagueiro", "Lateral Direito", "Lateral Esquerdo", "Lateral", "Volante", "Cabeça de Área", "Meio-Campo", "Meia-Atacante", "Ponta", "Atacante", "Centroavante"];
 
   return (
     <div className="min-h-screen bg-gray-50 text-black">
@@ -60,7 +61,7 @@ export default async function ElencoPage() {
 
                 <div className="flex flex-wrap justify-center gap-6 md:gap-8">
                   {posPlayers.map((player: any) => (
-                    <div key={player.id} className="w-[calc(50%-1rem)] sm:w-[calc(25%-1.5rem)] lg:w-[calc(20%-1.5rem)] max-w-[200px] group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 bg-white">
+                    <Link href={`/elenco/${player.id}`} key={player.id} className="w-[calc(50%-1rem)] sm:w-[calc(25%-1.5rem)] lg:w-[calc(20%-1.5rem)] max-w-[200px] group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 bg-white block">
                       <div className="aspect-[3/4] relative w-full">
                         <Image
                           src={player.image || "/images/player.jpg"}
@@ -77,7 +78,7 @@ export default async function ElencoPage() {
                         </h3>
                         <p className="text-[#38bdf8] font-semibold text-xs uppercase">{player.position}</p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

@@ -43,7 +43,7 @@ export async function SectionElenco() {
               key={`${player.id}-${index}`} 
               className="w-[50vw] sm:w-[33vw] lg:w-[25vw] xl:w-[20vw] flex-shrink-0 px-3 group cursor-pointer"
             >
-              <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+              <Link href={`/elenco/${player.id}`} className="block relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
                 <div className="aspect-[3/4] relative w-full">
                   <Image
                     src={player.image || "/images/player.jpg"}
@@ -60,7 +60,7 @@ export async function SectionElenco() {
                   </h3>
                   <p className="text-[#38bdf8] font-semibold text-xs sm:text-sm">{player.position}</p>
                 </div>
-              </div>
+              </Link>
             </div>
           ))}
         </div>
