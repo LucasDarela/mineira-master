@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Save, Trash2, Pencil, X } from "lucide-react";
 import { deletePlayer, updatePlayer } from "../actions";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 export function PlayerRow({ player }: { player: any }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Usa o bind para criar a Server Action com o ID já preenchido
   const saveAction = updatePlayer.bind(null, player.id);
@@ -80,6 +82,18 @@ export function PlayerRow({ player }: { player: any }) {
               </div>
             </div>
 
+            <div className="flex gap-4 mt-4">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input type="checkbox" name="is_friendly" defaultChecked={player.is_friendly} className="w-4 h-4 rounded text-[#0074D9]" />
+                Joga Amistosos
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <input type="checkbox" name="is_championship" defaultChecked={player.is_championship} className="w-4 h-4 rounded text-green-600" />
+                Joga Campeonato
+              </label>
+            </div>
+
+            <h4 className="font-bold text-sm text-[#001f3f] mt-4 border-b pb-1">Estatísticas - Amistosos</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase">C. Amarelos</label>
@@ -92,6 +106,22 @@ export function PlayerRow({ player }: { player: any }) {
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase">Gols Marcados</label>
                 <input type="number" name="goals" defaultValue={player.goals || 0} className="w-full p-2 border rounded text-sm" />
+              </div>
+            </div>
+
+            <h4 className="font-bold text-sm text-[#001f3f] mt-4 border-b pb-1">Estatísticas - Campeonato</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">C. Amarelos</label>
+                <input type="number" name="champ_yellow_cards" defaultValue={player.champ_yellow_cards || 0} className="w-full p-2 border rounded text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">C. Vermelhos</label>
+                <input type="number" name="champ_red_cards" defaultValue={player.champ_red_cards || 0} className="w-full p-2 border rounded text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase">Gols Marcados</label>
+                <input type="number" name="champ_goals" defaultValue={player.champ_goals || 0} className="w-full p-2 border rounded text-sm" />
               </div>
             </div>
             
@@ -129,16 +159,22 @@ export function PlayerRow({ player }: { player: any }) {
           <Pencil size={18} />
         </button>
         <button 
-          onClick={async () => {
-            if(confirm("Tem certeza que deseja remover este jogador?")) {
-              await deletePlayer(player.id);
-            }
-          }}
+          onClick={() => setIsDeleteModalOpen(true)}
           className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
           title="Excluir"
         >
           <Trash2 size={18} />
         </button>
+
+        <ConfirmModal 
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={async () => {
+            await deletePlayer(player.id);
+          }}
+          title="Remover Jogador"
+          message={`Tem certeza que deseja remover o jogador ${player.name}?`}
+        />
       </td>
     </tr>
   );

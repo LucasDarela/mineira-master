@@ -4,9 +4,11 @@ import { Save, Trash2, Pencil, X } from "lucide-react";
 import { updateGameResult, deleteGame, updateGame } from "../actions";
 import { LocationInput } from "./LocationInput";
 import { GameEventsEditor } from "./GameEventsEditor";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 export function GameRow({ game, players }: { game: any; players: any[] }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   if (isEditing) {
     return (
@@ -228,15 +230,24 @@ export function GameRow({ game, players }: { game: any; players: any[] }) {
             <Pencil size={18} />
           </button>
 
-          <form action={deleteGame.bind(null, game.id)}>
-            <button
-              type="submit"
-              className="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded"
-              title="Excluir Jogo"
-            >
-              <Trash2 size={18} />
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded"
+            title="Excluir Jogo"
+          >
+            <Trash2 size={18} />
+          </button>
+
+          <ConfirmModal 
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={async () => {
+              await deleteGame(game.id);
+            }}
+            title="Excluir Partida"
+            message={`Tem certeza que deseja excluir a partida contra ${game.opponent}?`}
+          />
         </div>
       </td>
     </tr>

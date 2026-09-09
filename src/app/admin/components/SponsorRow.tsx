@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { updateSponsor, deleteSponsor } from "../actions";
 import { Pencil, Trash2, Check, X, ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 type Sponsor = {
   id: string;
@@ -13,7 +14,7 @@ type Sponsor = {
 
 export function SponsorRow({ sponsor }: { sponsor: Sponsor }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   const formRef = useRef<HTMLFormElement>(null);
   
@@ -80,17 +81,17 @@ export function SponsorRow({ sponsor }: { sponsor: Sponsor }) {
             <Pencil size={18} />
           </button>
           
-          {isDeleting ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-red-600 font-medium">Tem certeza?</span>
-              <button onClick={handleDelete} className="p-1 text-white bg-red-600 hover:bg-red-700 rounded text-xs px-2">Sim</button>
-              <button onClick={() => setIsDeleting(false)} className="p-1 text-gray-600 bg-gray-200 hover:bg-gray-300 rounded text-xs px-2">Não</button>
-            </div>
-          ) : (
-            <button onClick={() => setIsDeleting(true)} className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors" title="Excluir">
-              <Trash2 size={18} />
-            </button>
-          )}
+          <button onClick={() => setIsDeleteModalOpen(true)} className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors" title="Excluir">
+            <Trash2 size={18} />
+          </button>
+          
+          <ConfirmModal 
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={handleDelete}
+            title="Remover Patrocinador"
+            message={`Tem certeza que deseja remover o patrocinador ${sponsor.name}?`}
+          />
         </div>
       </td>
     </tr>

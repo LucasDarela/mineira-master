@@ -1,4 +1,12 @@
+"use client";
+import { useEffect, useState } from "react";
+
 export function SectionInstagram() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   return (
     <section id="redes-sociais" className="py-10 bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,10 +24,14 @@ export function SectionInstagram() {
           </p>
         </div>
 
-        {/* Widget Elfsight */}
+        {/* Widget Elfsight (Rendered only on client to prevent hydration mismatch) */}
         <div>
-          <script src="https://elfsightcdn.com/platform.js" async></script>
-          <div className="elfsight-app-a007507c-a9a9-424b-aeaa-2e6916ad09aa" data-elfsight-app-lazy></div>
+          {mounted && (
+            <>
+              <script src="https://elfsightcdn.com/platform.js" async></script>
+              <div className="elfsight-app-a007507c-a9a9-424b-aeaa-2e6916ad09aa" data-elfsight-app-lazy></div>
+            </>
+          )}
         </div>
 
         <div className="text-center mt-12">

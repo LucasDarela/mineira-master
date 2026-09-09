@@ -2,9 +2,17 @@ import { createClient } from "@/utils/supabase/server";
 import Image from "next/image";
 import Link from "next/link";
 
-export async function SectionElenco() {
+export async function SectionElenco({ isChampionship = false }: { isChampionship?: boolean }) {
   const supabase = await createClient();
-  const { data: playersList } = await supabase.from("players").select("*").order("name");
+  let query = supabase.from("players").select("*").order("name");
+  
+  if (isChampionship) {
+    query = query.eq("is_championship", true);
+  } else {
+    query = query.eq("is_friendly", true);
+  }
+
+  const { data: playersList } = await query;
   
   // Se não houver jogadores reais cadastrados, gera alguns de mentira para preencher o visual
   const basePlayers = playersList && playersList.length > 0 ? playersList : Array.from({ length: 8 }).map((_, i) => ({
@@ -68,7 +76,7 @@ export async function SectionElenco() {
 
       <div className="mt-16 text-center">
         <Link 
-          href="/elenco" 
+          href={isChampionship ? "/campeonato/elenco" : "/elenco"} 
           className="inline-block bg-transparent border-2 border-[#001f3f] text-[#001f3f] hover:bg-[#001f3f] hover:text-white font-bold py-3 px-8 rounded-full transition-all uppercase tracking-widest text-sm"
         >
           Ver elenco completo

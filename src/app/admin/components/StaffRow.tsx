@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Save, Trash2, Pencil, X } from "lucide-react";
 import { deleteStaff, updateStaff } from "../actions";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 export function StaffRow({ staffMember }: { staffMember: any }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const saveAction = updateStaff.bind(null, staffMember.id);
 
   if (isEditing) {
@@ -67,13 +69,21 @@ export function StaffRow({ staffMember }: { staffMember: any }) {
           <Pencil size={18} />
         </button>
         <button 
-          onClick={async () => {
-            if(confirm("Tem certeza que deseja remover?")) await deleteStaff(staffMember.id);
-          }}
+          onClick={() => setIsDeleteModalOpen(true)}
           className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors" title="Excluir"
         >
           <Trash2 size={18} />
         </button>
+
+        <ConfirmModal 
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={async () => {
+            await deleteStaff(staffMember.id);
+          }}
+          title="Remover Membro da Comissão"
+          message={`Tem certeza que deseja remover ${staffMember.name}?`}
+        />
       </td>
     </tr>
   );

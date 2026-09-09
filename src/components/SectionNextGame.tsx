@@ -1,7 +1,7 @@
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 
-export async function SectionNextGame() {
+export async function SectionNextGame({ isChampionship = false }: { isChampionship?: boolean }) {
   const supabase = await createClient();
   
   const today = new Date().toISOString().split("T")[0];
@@ -10,6 +10,7 @@ export async function SectionNextGame() {
     .from("games")
     .select("*")
     .gte("date", today)
+    .eq("is_championship", isChampionship)
     .order("date", { ascending: true })
     .limit(1)
     .single();

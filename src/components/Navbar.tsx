@@ -61,11 +61,11 @@ export function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden xl:block">
-            <div className="ml-6 flex items-center space-x-1">
+            <div className="ml-6 flex items-center space-x-2">
               {navItems.map((item) => (
                 <div key={item.label} className="relative group">
                   {item.subItems ? (
-                    <button className="flex items-center text-[#001f3f] hover:text-[#0074D9] transition-colors px-2 py-2 rounded-md text-xs font-semibold tracking-wide uppercase whitespace-nowrap">
+                    <button className="flex items-center text-[#001f3f] hover:text-[#0074D9] transition-colors px-3 py-2 rounded-md text-sm font-semibold tracking-wide uppercase whitespace-nowrap">
                       {item.label}
                       <ChevronDown
                         size={16}
@@ -75,7 +75,7 @@ export function Navbar() {
                   ) : (
                     <Link
                       href={item.href!}
-                      className="flex items-center text-[#001f3f] hover:text-[#0074D9] transition-colors px-2 py-2 rounded-md text-xs font-semibold tracking-wide uppercase whitespace-nowrap"
+                      className="flex items-center text-[#001f3f] hover:text-[#0074D9] transition-colors px-3 py-2 rounded-md text-sm font-semibold tracking-wide uppercase whitespace-nowrap"
                     >
                       {item.label}
                     </Link>
@@ -158,7 +158,7 @@ export function Navbar() {
                             onClick={() => setIsOpen(false)}
                             className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#0074D9] hover:bg-white rounded-md"
                           >
-                            - {subItem.label}
+                            {subItem.label}
                           </Link>
                         ))}
                       </div>
@@ -181,7 +181,7 @@ export function Navbar() {
               href="https://maps.app.goo.gl/A598vQoi2L2KxV8s8"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-red-600 hover:bg-gray-50 px-3 py-3 rounded-md text-base font-bold uppercase"
+              className="flex items-center gap-2 text-green-600 hover:bg-gray-50 px-3 py-3 rounded-md text-base font-bold uppercase"
             >
               <MapPin size={20} />
               Campo do Mineira

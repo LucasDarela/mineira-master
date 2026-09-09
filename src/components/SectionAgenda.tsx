@@ -1,12 +1,14 @@
 import { createClient } from "@/utils/supabase/server";
 import { AgendaCard } from "./AgendaCard";
 import { AgendaRow } from "./AgendaRow";
-
-export async function SectionAgenda() {
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+export async function SectionAgenda({ isChampionship = false }: { isChampionship?: boolean }) {
   const supabase = await createClient();
   const { data: games } = await supabase
     .from("games")
     .select("*")
+    .eq("is_championship", isChampionship)
     .order("date", { ascending: false })
     .limit(6);
 
@@ -60,13 +62,13 @@ export async function SectionAgenda() {
         </div>
 
 
-        <div className="mt-8 text-center">
-          <a
-            href="/jogos"
-            className="inline-flex items-center justify-center bg-white text-[#001f3f] border-2 border-[#001f3f] hover:bg-[#001f3f] hover:text-white font-bold py-3 px-8 rounded-full transition-colors shadow-sm"
+        <div className="mt-12 text-center">
+          <Link
+            href={isChampionship ? "/campeonato/agenda" : "/jogos"}
+            className="inline-flex items-center gap-2 bg-[#001f3f] text-white px-8 py-4 rounded-full font-bold uppercase tracking-wider hover:bg-[#003366] transition-colors shadow-lg hover:shadow-xl"
           >
-            Ver Agenda Completa
-          </a>
+            Ver Agenda Completa <ChevronRight size={20} />
+          </Link>
         </div>
       </div>
     </section>

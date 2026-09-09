@@ -14,6 +14,7 @@ import {
   Briefcase,
   ClipboardList,
   MonitorPlay,
+  Wallet,
 } from "lucide-react";
 import { GameRow } from "./components/GameRow";
 import { PlayerRow } from "./components/PlayerRow";
@@ -23,6 +24,9 @@ import { SponsorRow } from "./components/SponsorRow";
 import { LocationInput } from "./components/LocationInput";
 import { SearchFilter } from "./components/SearchFilter";
 import { GameEventsEditor } from "./components/GameEventsEditor";
+import { FinanceiroTab } from "./components/FinanceiroTab";
+import { ClassificacaoTab } from "./components/ClassificacaoTab";
+import { Trophy } from "lucide-react";
 
 export default async function AdminPage(props: {
   searchParams: Promise<{ tab?: string; q?: string }>;
@@ -53,6 +57,47 @@ export default async function AdminPage(props: {
     .select("*")
     .order("name", { ascending: true });
 
+  let { data: financial_transactions } = await supabase
+    .from("financial_transactions")
+    .select("*")
+    .order("date", { ascending: false });
+
+  let { data: player_dues } = await supabase
+    .from("player_dues")
+    .select("*")
+    .order("year", { ascending: false })
+    .order("month", { ascending: false });
+
+  let { data: standingsData } = await supabase
+    .from("championship_standings")
+    .select("*");
+
+  let standings = standingsData || [];
+
+  if (games) {
+    const champGames = games.filter((g: any) => g.is_championship && g.outcome);
+    const mmStats = {
+      id: "mineira-master-auto",
+      team_name: "Mineira Master",
+      matches_played: champGames.length,
+      wins: champGames.filter((g: any) => g.outcome === "V").length,
+      draws: champGames.filter((g: any) => g.outcome === "E").length,
+      losses: champGames.filter((g: any) => g.outcome === "D").length,
+      goals_for: champGames.reduce(
+        (sum: number, g: any) => sum + (g.goals_players?.length || 0),
+        0,
+      ),
+      goals_against: champGames.reduce(
+        (sum: number, g: any) => sum + (g.opponent_goals || 0),
+        0,
+      ),
+      is_auto: true,
+    };
+    standings = standings.filter(
+      (s: any) => s.team_name.toLowerCase() !== "mineira master",
+    );
+    standings.push(mmStats);
+  }
   if (q) {
     if (games)
       games = games.filter((g: any) => g.opponent.toLowerCase().includes(q));
@@ -117,10 +162,29 @@ export default async function AdminPage(props: {
           >
             <MonitorPlay size={18} /> Patrocinadores
           </a>
+          <a
+            href="?tab=classificacao"
+            className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "classificacao" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
+          >
+            <Trophy size={18} /> Campeonato
+          </a>
+          <a
+            href="?tab=financeiro"
+            className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "financeiro" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
+          >
+            <Wallet size={18} /> Financeiro
+          </a>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* ABA CLASSIFICAÇÃO */}
+        {currentTab === "classificacao" && (
+          <div className="lg:col-span-3">
+            <ClassificacaoTab standings={standings || []} />
+          </div>
+        )}
+
         {/* ABA JOGOS */}
         {currentTab === "jogos" && (
           <>
@@ -129,7 +193,19 @@ export default async function AdminPage(props: {
                 <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
                   Adicionar Novo Jogo
                   <span className="transition group-open:rotate-180">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
                   </span>
                 </summary>
                 <form action={addGame} className="space-y-4">
@@ -281,7 +357,19 @@ export default async function AdminPage(props: {
                 <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
                   Adicionar Jogador
                   <span className="transition group-open:rotate-180">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
                   </span>
                 </summary>
                 {/* IMPORTANTE: encType="multipart/form-data" para upload de arquivos */}
@@ -389,6 +477,30 @@ export default async function AdminPage(props: {
                       />
                     </div>
                   </div>
+
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        name="is_friendly"
+                        defaultChecked
+                        className="w-4 h-4 rounded text-[#0074D9]"
+                      />
+                      Joga Amistosos
+                    </label>
+                    <label className="flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        name="is_championship"
+                        className="w-4 h-4 rounded text-green-600"
+                      />
+                      Joga Campeonato
+                    </label>
+                  </div>
+
+                  <h4 className="font-bold text-sm text-[#001f3f] border-b pb-1">
+                    Estatísticas - Amistosos
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -424,6 +536,46 @@ export default async function AdminPage(props: {
                       />
                     </div>
                   </div>
+
+                  <h4 className="font-bold text-sm text-[#001f3f] border-b pb-1">
+                    Estatísticas - Campeonato
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        C. Amarelos
+                      </label>
+                      <input
+                        type="number"
+                        name="champ_yellow_cards"
+                        defaultValue="0"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        C. Vermelhos
+                      </label>
+                      <input
+                        type="number"
+                        name="champ_red_cards"
+                        defaultValue="0"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Gols Marcados
+                      </label>
+                      <input
+                        type="number"
+                        name="champ_goals"
+                        defaultValue="0"
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Foto
@@ -494,7 +646,19 @@ export default async function AdminPage(props: {
                 <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
                   Adicionar Diretor
                   <span className="transition group-open:rotate-180">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
                   </span>
                 </summary>
                 <form action={addDirector} className="space-y-4">
@@ -590,7 +754,19 @@ export default async function AdminPage(props: {
                 <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
                   Adicionar Membro (Comissão)
                   <span className="transition group-open:rotate-180">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
                   </span>
                 </summary>
                 <form action={addStaff} className="space-y-4">
@@ -686,7 +862,19 @@ export default async function AdminPage(props: {
                 <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
                   Adicionar Patrocinador
                   <span className="transition group-open:rotate-180">
-                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                    <svg
+                      fill="none"
+                      height="24"
+                      shapeRendering="geometricPrecision"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
                   </span>
                 </summary>
                 <form action={addSponsor} className="space-y-4">
@@ -772,6 +960,16 @@ export default async function AdminPage(props: {
               </div>
             </div>
           </>
+        )}
+        {/* ABA FINANCEIRO */}
+        {currentTab === "financeiro" && (
+          <div className="lg:col-span-3">
+            <FinanceiroTab
+              transactions={financial_transactions || []}
+              playerDues={player_dues || []}
+              players={players || []}
+            />
+          </div>
         )}
       </main>
     </div>

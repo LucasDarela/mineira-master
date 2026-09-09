@@ -65,9 +65,13 @@ export async function addGame(formData: FormData) {
   const red_cards_count = red_cards_players.length;
   const goals_count = goals_players.length;
   
-  let outcome = "E";
-  if (goals_count > opponent_goals) outcome = "V";
-  else if (goals_count < opponent_goals) outcome = "D";
+  let outcome: string | null = null;
+  const isPastGame = new Date(`${date}T${time || '00:00'}:00`) <= new Date();
+  if (isPastGame || goals_count > 0 || opponent_goals > 0) {
+    outcome = "E";
+    if (goals_count > opponent_goals) outcome = "V";
+    else if (goals_count < opponent_goals) outcome = "D";
+  }
 
   const { data: newGame, error } = await supabase.from("games").insert([{ 
     opponent, 
@@ -88,9 +92,13 @@ export async function addGame(formData: FormData) {
   }]).select().single();
 
   if (newGame) {
-    await changePlayerStats(supabase, goals_players, 'goals', 1);
-    await changePlayerStats(supabase, yellow_cards_players, 'yellow_cards', 1);
-    await changePlayerStats(supabase, red_cards_players, 'red_cards', 1);
+    const goalsCol = is_championship ? 'champ_goals' : 'goals';
+    const yellowCol = is_championship ? 'champ_yellow_cards' : 'yellow_cards';
+    const redCol = is_championship ? 'champ_red_cards' : 'red_cards';
+
+    await changePlayerStats(supabase, goals_players, goalsCol, 1);
+    await changePlayerStats(supabase, yellow_cards_players, yellowCol, 1);
+    await changePlayerStats(supabase, red_cards_players, redCol, 1);
   }
 
   revalidatePath("/", "layout");
@@ -134,17 +142,25 @@ export async function updateGame(id: string, formData: FormData) {
   const red_cards_count = red_cards_players.length;
   const goals_count = goals_players.length;
   
-  let outcome = "E";
-  if (goals_count > opponent_goals) outcome = "V";
-  else if (goals_count < opponent_goals) outcome = "D";
+  let outcome: string | null = null;
+  const isPastGame = new Date(`${date}T${time || '00:00'}:00`) <= new Date();
+  if (isPastGame || goals_count > 0 || opponent_goals > 0) {
+    outcome = "E";
+    if (goals_count > opponent_goals) outcome = "V";
+    else if (goals_count < opponent_goals) outcome = "D";
+  }
   
   // Buscar o jogo antigo para reverter as estatísticas
-  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players").eq("id", id).single();
+  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players, is_championship").eq("id", id).single();
   
   if (oldGame) {
-    await changePlayerStats(supabase, oldGame.goals_players || [], 'goals', -1);
-    await changePlayerStats(supabase, oldGame.yellow_cards_players || [], 'yellow_cards', -1);
-    await changePlayerStats(supabase, oldGame.red_cards_players || [], 'red_cards', -1);
+    const oldGoalsCol = oldGame.is_championship ? 'champ_goals' : 'goals';
+    const oldYellowCol = oldGame.is_championship ? 'champ_yellow_cards' : 'yellow_cards';
+    const oldRedCol = oldGame.is_championship ? 'champ_red_cards' : 'red_cards';
+
+    await changePlayerStats(supabase, oldGame.goals_players || [], oldGoalsCol, -1);
+    await changePlayerStats(supabase, oldGame.yellow_cards_players || [], oldYellowCol, -1);
+    await changePlayerStats(supabase, oldGame.red_cards_players || [], oldRedCol, -1);
   }
   
   const { data: updatedGame, error: updateError } = await supabase.from("games").update({ 
@@ -173,21 +189,30 @@ export async function updateGame(id: string, formData: FormData) {
   console.log("UPDATE RESULT:", updatedGame, updateError);
 
   console.log("CHANGING STATS UP", { goals_players, yellow_cards_players, red_cards_players });
-  await changePlayerStats(supabase, goals_players, 'goals', 1);
-  await changePlayerStats(supabase, yellow_cards_players, 'yellow_cards', 1);
-  await changePlayerStats(supabase, red_cards_players, 'red_cards', 1);
+  
+  const goalsCol = is_championship ? 'champ_goals' : 'goals';
+  const yellowCol = is_championship ? 'champ_yellow_cards' : 'yellow_cards';
+  const redCol = is_championship ? 'champ_red_cards' : 'red_cards';
+
+  await changePlayerStats(supabase, goals_players, goalsCol, 1);
+  await changePlayerStats(supabase, yellow_cards_players, yellowCol, 1);
+  await changePlayerStats(supabase, red_cards_players, redCol, 1);
 
   revalidatePath("/", "layout");
 }
 
 export async function deleteGame(id: string) {
   const supabase = await createClient();
-  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players").eq("id", id).single();
+  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players, is_championship").eq("id", id).single();
   
   if (oldGame) {
-    await changePlayerStats(supabase, oldGame.goals_players || [], 'goals', -1);
-    await changePlayerStats(supabase, oldGame.yellow_cards_players || [], 'yellow_cards', -1);
-    await changePlayerStats(supabase, oldGame.red_cards_players || [], 'red_cards', -1);
+    const goalsCol = oldGame.is_championship ? 'champ_goals' : 'goals';
+    const yellowCol = oldGame.is_championship ? 'champ_yellow_cards' : 'yellow_cards';
+    const redCol = oldGame.is_championship ? 'champ_red_cards' : 'red_cards';
+
+    await changePlayerStats(supabase, oldGame.goals_players || [], goalsCol, -1);
+    await changePlayerStats(supabase, oldGame.yellow_cards_players || [], yellowCol, -1);
+    await changePlayerStats(supabase, oldGame.red_cards_players || [], redCol, -1);
   }
 
   await supabase.from("games").delete().eq("id", id);
@@ -264,12 +289,20 @@ export async function addPlayer(formData: FormData) {
   const red_cards = parseInt(formData.get("red_cards") as string || "0");
   const goals = parseInt(formData.get("goals") as string || "0");
   
+  const champ_yellow_cards = parseInt(formData.get("champ_yellow_cards") as string || "0");
+  const champ_red_cards = parseInt(formData.get("champ_red_cards") as string || "0");
+  const champ_goals = parseInt(formData.get("champ_goals") as string || "0");
+  
+  const is_friendly = formData.get("is_friendly") === "on";
+  const is_championship = formData.get("is_championship") === "on";
+  
   const file = formData.get("image") as File;
   const image = await uploadImageToStorage(file) || "/images/player.jpg";
   
   await supabase.from("players").insert([{ 
     name, position, jersey_number, image, 
-    entry_year, birthplace, birth_date, height, weight, yellow_cards, red_cards, goals 
+    entry_year, birthplace, birth_date, height, weight, yellow_cards, red_cards, goals,
+    champ_yellow_cards, champ_red_cards, champ_goals, is_friendly, is_championship
   }]);
   revalidatePath("/", "layout");
 }
@@ -289,9 +322,17 @@ export async function updatePlayer(id: string, formData: FormData) {
   const red_cards = parseInt(formData.get("red_cards") as string || "0");
   const goals = parseInt(formData.get("goals") as string || "0");
   
+  const champ_yellow_cards = parseInt(formData.get("champ_yellow_cards") as string || "0");
+  const champ_red_cards = parseInt(formData.get("champ_red_cards") as string || "0");
+  const champ_goals = parseInt(formData.get("champ_goals") as string || "0");
+  
+  const is_friendly = formData.get("is_friendly") === "on";
+  const is_championship = formData.get("is_championship") === "on";
+  
   const updateData: any = { 
     name, position, jersey_number, 
-    entry_year, birthplace, birth_date, height, weight, yellow_cards, red_cards, goals 
+    entry_year, birthplace, birth_date, height, weight, yellow_cards, red_cards, goals,
+    champ_yellow_cards, champ_red_cards, champ_goals, is_friendly, is_championship
   };
   const file = formData.get("image") as File;
   const uploadedImage = await uploadImageToStorage(file);
@@ -394,5 +435,47 @@ export async function updateSponsor(id: string, formData: FormData) {
 export async function deleteSponsor(id: string) {
   const supabase = await createClient();
   await supabase.from("sponsors").delete().eq("id", id);
+  revalidatePath("/", "layout");
+}
+
+// ==== CLASSIFICAÇÃO ====
+
+export async function addStanding(formData: FormData) {
+  const supabase = await createClient();
+  const team_name = formData.get("team_name") as string;
+  const matches_played = parseInt(formData.get("matches_played") as string || "0");
+  const wins = parseInt(formData.get("wins") as string || "0");
+  const draws = parseInt(formData.get("draws") as string || "0");
+  const losses = parseInt(formData.get("losses") as string || "0");
+  const goals_for = parseInt(formData.get("goals_for") as string || "0");
+  const goals_against = parseInt(formData.get("goals_against") as string || "0");
+  
+  await supabase.from("championship_standings").insert([{ 
+    team_name, matches_played, wins, draws, losses, goals_for, goals_against 
+  }]);
+  
+  revalidatePath("/", "layout");
+}
+
+export async function updateStanding(id: string, formData: FormData) {
+  const supabase = await createClient();
+  const team_name = formData.get("team_name") as string;
+  const matches_played = parseInt(formData.get("matches_played") as string || "0");
+  const wins = parseInt(formData.get("wins") as string || "0");
+  const draws = parseInt(formData.get("draws") as string || "0");
+  const losses = parseInt(formData.get("losses") as string || "0");
+  const goals_for = parseInt(formData.get("goals_for") as string || "0");
+  const goals_against = parseInt(formData.get("goals_against") as string || "0");
+  
+  await supabase.from("championship_standings").update({ 
+    team_name, matches_played, wins, draws, losses, goals_for, goals_against 
+  }).eq("id", id);
+  
+  revalidatePath("/", "layout");
+}
+
+export async function deleteStanding(id: string) {
+  const supabase = await createClient();
+  await supabase.from("championship_standings").delete().eq("id", id);
   revalidatePath("/", "layout");
 }
