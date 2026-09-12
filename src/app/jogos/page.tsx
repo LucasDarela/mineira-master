@@ -14,7 +14,7 @@ export default async function JogosPage({
   const supabase = await createClient();
   const resolvedSearchParams = await searchParams;
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 30;
   const currentPage = Number(resolvedSearchParams.page) || 1;
   const from = (currentPage - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
@@ -24,6 +24,16 @@ export default async function JogosPage({
     .select("*", { count: "exact" })
     .order("date", { ascending: false })
     .range(from, to);
+
+  // Descobrir qual é o próximo jogo para destacá-lo, independente da página atual
+  const today = new Date().toISOString().split("T")[0];
+  const { data: nextGameData } = await supabase
+    .from("games")
+    .select("id")
+    .gte("date", today)
+    .order("date", { ascending: true })
+    .limit(1);
+  const nextGameId = nextGameData?.[0]?.id;
 
   // Fetch all games for stats (could be optimized with an RPC or view in the future)
   const { data: allGames } = await supabase
@@ -141,12 +151,12 @@ export default async function JogosPage({
                 Nenhum jogo agendado.
               </div>
             )}
-            {games?.map((game) => {
+            {games?.map((game, index) => {
               const dateObj = new Date(game.date);
               const dateStr = dateObj.toLocaleDateString("pt-BR", {
                 timeZone: "UTC",
               });
-              return <AgendaCard key={game.id} game={game} dateStr={dateStr} />;
+              return <AgendaCard key={game.id} game={game} index={index} isNextGame={game.id === nextGameId} dateStr={dateStr} />;
             })}
           </div>
 
@@ -193,6 +203,7 @@ export default async function JogosPage({
                       key={game.id}
                       game={game}
                       index={index}
+                      isNextGame={game.id === nextGameId}
                       dateStr={dateStr}
                     />
                   );

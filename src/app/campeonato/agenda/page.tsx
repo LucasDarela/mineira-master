@@ -26,6 +26,16 @@ export default async function CampeonatoAgendaPage({
     .order("date", { ascending: false })
     .range(from, to);
 
+  const today = new Date().toISOString().split("T")[0];
+  const { data: nextGameData } = await supabase
+    .from("games")
+    .select("id")
+    .eq("is_championship", true)
+    .gte("date", today)
+    .order("date", { ascending: true })
+    .limit(1);
+  const nextGameId = nextGameData?.[0]?.id;
+
   // Fetch all games for stats
   const { data: allGames } = await supabase
     .from("games")
@@ -143,12 +153,12 @@ export default async function CampeonatoAgendaPage({
                 Nenhum jogo agendado.
               </div>
             )}
-            {games?.map((game) => {
+            {games?.map((game, index) => {
               const dateObj = new Date(game.date);
               const dateStr = dateObj.toLocaleDateString("pt-BR", {
                 timeZone: "UTC",
               });
-              return <AgendaCard key={game.id} game={game} dateStr={dateStr} />;
+              return <AgendaCard key={game.id} game={game} index={index} isNextGame={game.id === nextGameId} dateStr={dateStr} />;
             })}
           </div>
 
@@ -195,6 +205,7 @@ export default async function CampeonatoAgendaPage({
                       key={game.id}
                       game={game}
                       index={index}
+                      isNextGame={game.id === nextGameId}
                       dateStr={dateStr}
                     />
                   );

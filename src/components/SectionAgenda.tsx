@@ -5,12 +5,28 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 export async function SectionAgenda({ isChampionship = false }: { isChampionship?: boolean }) {
   const supabase = await createClient();
-  const { data: games } = await supabase
+  const today = new Date().toISOString().split("T")[0];
+  
+  // Buscar o próximo jogo (1 apenas)
+  const { data: futureGames } = await supabase
     .from("games")
     .select("*")
     .eq("is_championship", isChampionship)
+    .gte("date", today)
+    .order("date", { ascending: true })
+    .limit(1);
+
+  // Buscar os últimos jogos passados (5 apenas, para dar total 6)
+  const { data: pastGames } = await supabase
+    .from("games")
+    .select("*")
+    .eq("is_championship", isChampionship)
+    .lt("date", today)
     .order("date", { ascending: false })
-    .limit(6);
+    .limit(5);
+
+  const games = [...(futureGames || []), ...(pastGames || [])];
+  const nextGameId = futureGames?.[0]?.id;
 
   return (
     <section id="agenda" className="py-12 bg-[#f8f9fa]">
@@ -27,10 +43,10 @@ export async function SectionAgenda({ isChampionship = false }: { isChampionship
           {games?.length === 0 && (
             <div className="py-8 text-center text-gray-500 font-medium">Nenhum jogo agendado no momento.</div>
           )}
-          {games?.map((game) => {
+          {games?.map((game, index) => {
             const dateObj = new Date(game.date);
             const dateStr = dateObj.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            return <AgendaCard key={game.id} game={game} dateStr={dateStr} />;
+            return <AgendaCard key={game.id} game={game} index={index} isNextGame={game.id === nextGameId} dateStr={dateStr} />;
           })}
         </div>
 
@@ -55,7 +71,7 @@ export async function SectionAgenda({ isChampionship = false }: { isChampionship
               {games?.map((game, index) => {
                 const dateObj = new Date(game.date);
                 const dateStr = dateObj.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                return <AgendaRow key={game.id} game={game} index={index} dateStr={dateStr} />;
+                return <AgendaRow key={game.id} game={game} index={index} isNextGame={game.id === nextGameId} dateStr={dateStr} />;
               })}
             </tbody>
           </table>

@@ -148,51 +148,112 @@ function EventGroup({
   );
 }
 
+function OpponentGoalScorersGroup({
+  value = [],
+  onChange,
+}: {
+  value: string[];
+  onChange: (val: string[]) => void;
+}) {
+  const [count, setCount] = useState(value.length);
+
+  useEffect(() => {
+    if (value.length > count) setCount(value.length);
+  }, [value, count]);
+
+  return (
+    <div className="bg-gray-50 p-4 rounded border mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold text-[#001f3f]">🥅 Gols Sofridos</h3>
+        <select
+          value={count}
+          onChange={(e) => {
+            const newCount = parseInt(e.target.value);
+            setCount(newCount);
+            if (newCount < value.length) {
+              onChange(value.slice(0, newCount));
+            }
+          }}
+          className="p-1 border rounded text-sm bg-white font-bold"
+        >
+          {Array.from({ length: 21 }).map((_, i) => (
+            <option key={i} value={i}>
+              {i}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-3">
+        {Array.from({ length: count }).map((_, i) => (
+          <div key={i} className="relative">
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+              Goleador #{i + 1}
+            </label>
+            <input
+              type="text"
+              value={value[i] || ""}
+              onChange={(e) => {
+                const newVal = [...value];
+                newVal[i] = e.target.value.substring(0, 30);
+                onChange(newVal);
+              }}
+              className="w-full p-2 border border-gray-300 rounded text-sm bg-white focus:ring-2 focus:ring-[#0074D9] outline-none"
+              placeholder="Nome do jogador adversário..."
+              maxLength={30}
+            />
+          </div>
+        ))}
+        {count === 0 && (
+          <p className="text-xs text-gray-400 italic">
+            Nenhum gol sofrido registrado.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function GameEventsEditor({
   players,
   defaultGoals = [],
+  defaultOwnGoals = [],
   defaultYellowCards = [],
   defaultRedCards = [],
-  defaultOpponentGoals = 0,
+  defaultOpponentGoalsScorers = [],
 }: {
   players: Player[];
   defaultGoals?: string[];
+  defaultOwnGoals?: string[];
   defaultYellowCards?: string[];
   defaultRedCards?: string[];
-  defaultOpponentGoals?: number;
+  defaultOpponentGoalsScorers?: string[];
 }) {
   const [goals, setGoals] = useState<string[]>(defaultGoals);
+  const [ownGoals, setOwnGoals] = useState<string[]>(defaultOwnGoals);
   const [yellowCards, setYellowCards] = useState<string[]>(defaultYellowCards);
   const [redCards, setRedCards] = useState<string[]>(defaultRedCards);
-  const [opponentGoals, setOpponentGoals] = useState(defaultOpponentGoals);
+  const [opponentScorers, setOpponentScorers] = useState<string[]>(defaultOpponentGoalsScorers);
 
   return (
     <div className="col-span-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
         <EventGroup
           title="⚽ Gols Marcados"
           players={players}
           value={goals}
           onChange={setGoals}
         />
-        <div className="bg-gray-50 p-4 rounded border mb-4 flex flex-col h-full">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-[#001f3f]">🥅 Gols Sofridos</h3>
-          </div>
-          <div className="flex-1 flex flex-col justify-center items-center">
-            <input
-              type="number"
-              name="opponent_goals"
-              value={opponentGoals}
-              onChange={(e) => setOpponentGoals(parseInt(e.target.value) || 0)}
-              min={0}
-              className="w-full text-center text-4xl font-black text-[#001f3f] p-4 border rounded bg-white shadow-inner focus:outline-none focus:ring-2 focus:ring-[#0074D9] transition-all"
-            />
-            <p className="text-[10px] text-gray-500 text-center mt-3 uppercase tracking-widest font-bold">
-              Time Adversário
-            </p>
-          </div>
-        </div>
+        <OpponentGoalScorersGroup
+          value={opponentScorers}
+          onChange={setOpponentScorers}
+        />
+        <EventGroup
+          title="🤦‍♂️ Gols Contra"
+          players={players}
+          value={ownGoals}
+          onChange={setOwnGoals}
+        />
         <EventGroup
           title="🟨 C. Amarelos"
           players={players}
@@ -211,6 +272,16 @@ export function GameEventsEditor({
         type="hidden"
         name="goals_players"
         value={JSON.stringify(goals.filter(Boolean))}
+      />
+      <input
+        type="hidden"
+        name="own_goals_players"
+        value={JSON.stringify(ownGoals.filter(Boolean))}
+      />
+      <input
+        type="hidden"
+        name="opponent_goals_scorers"
+        value={JSON.stringify(opponentScorers)}
       />
       <input
         type="hidden"

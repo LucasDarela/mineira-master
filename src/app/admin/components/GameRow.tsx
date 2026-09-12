@@ -147,9 +147,10 @@ export function GameRow({ game, players }: { game: any; players: any[] }) {
               <GameEventsEditor
                 players={players}
                 defaultGoals={game.goals_players || []}
+                defaultOwnGoals={game.own_goals_players || []}
                 defaultYellowCards={game.yellow_cards_players || []}
                 defaultRedCards={game.red_cards_players || []}
-                defaultOpponentGoals={game.opponent_goals || 0}
+                defaultOpponentGoalsScorers={game.opponent_goals_scorers || []}
               />
             </div>
 

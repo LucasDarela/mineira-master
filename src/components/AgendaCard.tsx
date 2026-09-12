@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 
-export function AgendaCard({ game, dateStr }: { game: any, dateStr: string }) {
+export function AgendaCard({ game, index, dateStr, isNextGame }: { game: any, index: number, dateStr: string, isNextGame?: boolean }) {
   const router = useRouter();
   
   const mineiraGoals = (game.goals_players || []).length;
@@ -20,7 +20,11 @@ export function AgendaCard({ game, dateStr }: { game: any, dateStr: string }) {
   return (
     <div 
       onClick={() => router.push(`/jogos/${game.id}`)}
-      className="bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-[#0074D9] transition-colors overflow-hidden"
+      className={`bg-white border rounded-lg shadow-sm cursor-pointer transition-colors overflow-hidden ${
+        isNextGame 
+          ? "border-yellow-400 border-2 shadow-md bg-yellow-50/50" 
+          : "border-gray-200 hover:border-[#0074D9]"
+      }`}
     >
       {/* Header: Data | Hora — Local */}
       <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex justify-between items-center text-xs text-gray-500 font-semibold uppercase tracking-wider">
@@ -45,6 +49,14 @@ export function AgendaCard({ game, dateStr }: { game: any, dateStr: string }) {
           {isFinished ? (
             <span className="text-[10px] text-gray-400 uppercase tracking-widest mt-1 font-semibold">
               Finalizado
+            </span>
+          ) : isNextGame ? (
+            <span className="text-[10px] text-yellow-600 uppercase tracking-widest mt-1 font-bold flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+              </span>
+              Próximo Jogo
             </span>
           ) : (
             <span className="text-[10px] text-[#0074D9] uppercase tracking-widest mt-1 font-semibold">

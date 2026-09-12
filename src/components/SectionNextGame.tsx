@@ -1,11 +1,15 @@
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 
-export async function SectionNextGame({ isChampionship = false }: { isChampionship?: boolean }) {
+export async function SectionNextGame({
+  isChampionship = false,
+}: {
+  isChampionship?: boolean;
+}) {
   const supabase = await createClient();
-  
+
   const today = new Date().toISOString().split("T")[0];
-  
+
   const { data: nextGame } = await supabase
     .from("games")
     .select("*")
@@ -18,16 +22,22 @@ export async function SectionNextGame({ isChampionship = false }: { isChampionsh
   if (!nextGame) return null;
 
   const dateObj = new Date(nextGame.date);
-  const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const formattedDate = dateObj.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 
-  const homeTeam = nextGame.home_or_away === 'Fora' ? nextGame.opponent : 'Mineira Master';
-  const awayTeam = nextGame.home_or_away === 'Fora' ? 'Mineira Master' : nextGame.opponent;
+  const homeTeam =
+    nextGame.home_or_away === "Fora" ? nextGame.opponent : "Mineira Master";
+  const awayTeam =
+    nextGame.home_or_away === "Fora" ? "Mineira Master" : nextGame.opponent;
 
   return (
     <section className="bg-gradient-to-r from-[#001f3f] to-[#0074D9] py-10 text-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10 bg-[url('/images/hero2.jpg')] bg-cover bg-center mix-blend-overlay"></div>
+      <div className="absolute inset-0 opacity-10 bg-[url('/images/hero2.webp')] bg-cover bg-center mix-blend-overlay"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
         {/* Título */}
         <div className="text-center mb-6">
           <h2 className="text-sm uppercase tracking-[0.3em] font-bold text-gray-300 mb-4">
@@ -36,9 +46,13 @@ export async function SectionNextGame({ isChampionship = false }: { isChampionsh
 
           {/* Layout mobile: vertical com X centralizado */}
           <div className="flex md:hidden flex-col items-center gap-2">
-            <span className="text-3xl font-extrabold uppercase leading-tight">{homeTeam}</span>
+            <span className="text-3xl font-extrabold uppercase leading-tight">
+              {homeTeam}
+            </span>
             <span className="text-2xl font-black text-[#38bdf8]">×</span>
-            <span className="text-3xl font-extrabold uppercase leading-tight">{awayTeam}</span>
+            <span className="text-3xl font-extrabold uppercase leading-tight">
+              {awayTeam}
+            </span>
           </div>
 
           {/* Layout desktop: horizontal */}
@@ -54,22 +68,32 @@ export async function SectionNextGame({ isChampionship = false }: { isChampionsh
             <div className="flex flex-col items-center text-center gap-2">
               <Calendar className="text-[#38bdf8]" size={28} />
               <div>
-                <p className="text-[10px] text-gray-300 uppercase tracking-wider">Data</p>
-                <p className="text-sm font-bold leading-tight">{formattedDate}</p>
+                <p className="text-[10px] text-gray-300 uppercase tracking-wider">
+                  Data
+                </p>
+                <p className="text-sm font-bold leading-tight">
+                  {formattedDate}
+                </p>
               </div>
             </div>
             <div className="flex flex-col items-center text-center gap-2">
               <Clock className="text-[#38bdf8]" size={28} />
               <div>
-                <p className="text-[10px] text-gray-300 uppercase tracking-wider">Horário</p>
+                <p className="text-[10px] text-gray-300 uppercase tracking-wider">
+                  Horário
+                </p>
                 <p className="text-sm font-bold">{nextGame.time}</p>
               </div>
             </div>
             <div className="flex flex-col items-center text-center gap-2">
               <MapPin className="text-[#38bdf8]" size={28} />
               <div>
-                <p className="text-[10px] text-gray-300 uppercase tracking-wider">Local</p>
-                <p className="text-sm font-bold leading-tight">{nextGame.location}</p>
+                <p className="text-[10px] text-gray-300 uppercase tracking-wider">
+                  Local
+                </p>
+                <p className="text-sm font-bold leading-tight">
+                  {nextGame.location}
+                </p>
                 <a
                   href={`https://maps.google.com/?q=${encodeURIComponent(nextGame.location)}`}
                   target="_blank"
@@ -117,7 +141,6 @@ export async function SectionNextGame({ isChampionship = false }: { isChampionsh
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );

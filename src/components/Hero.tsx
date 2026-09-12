@@ -30,13 +30,13 @@ export function Hero() {
 
   const slides = [
     {
-      src: "/images/hero1.jpg",
+      src: "/images/hero1.webp",
       alt: "Lances do jogo do Mineira Master",
       title: "Garra e Experiência",
       subtitle: "Futebol arte em Criciúma",
     },
     {
-      src: "/images/hero2.jpg",
+      src: "/images/hero2.webp",
       alt: "Estádio iluminado",
       title: "Paixão que Não Envelhece",
       subtitle: "Mineira Master 50+",
@@ -44,7 +44,7 @@ export function Hero() {
   ];
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#001f3f]">
+    <div className="relative w-full min-h-[450px] aspect-[4/3] md:aspect-video lg:h-screen overflow-hidden bg-[#001f3f]">
       <div className="absolute inset-0 z-0 h-full w-full" ref={emblaRef}>
         <div className="flex h-full w-full touch-pan-y">
           {slides.map((slide, index) => (
@@ -61,11 +61,11 @@ export function Hero() {
                 priority={index === 0}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#001f3f] via-transparent to-transparent opacity-80" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4 drop-shadow-lg tracking-tight uppercase">
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-24 md:pb-32 text-center px-4">
+                <h1 className="hidden md:block text-5xl md:text-7xl font-extrabold text-white mb-4 drop-shadow-lg tracking-tight uppercase">
                   {slide.title}
                 </h1>
-                <p className="text-xl md:text-3xl text-gray-200 font-medium drop-shadow-md">
+                <p className="hidden md:block text-xl md:text-3xl text-gray-200 font-medium drop-shadow-md">
                   {slide.subtitle}
                 </p>
                 <div className="mt-8">
@@ -81,7 +81,7 @@ export function Hero() {
           ))}
         </div>
       </div>
-      
+
       {/* Controls */}
       <button
         onClick={scrollPrev}
@@ -95,7 +95,7 @@ export function Hero() {
       >
         <ChevronRight size={32} />
       </button>
-      
+
       {/* Indicators */}
       <div className="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-10">
         {slides.map((_, idx) => (
@@ -103,7 +103,9 @@ export function Hero() {
             key={idx}
             onClick={() => emblaApi?.scrollTo(idx)}
             className={`w-3 h-3 rounded-full transition-all ${
-              idx === selectedIndex ? "bg-[#0074D9] w-8" : "bg-white/50 hover:bg-white"
+              idx === selectedIndex
+                ? "bg-[#0074D9] w-8"
+                : "bg-white/50 hover:bg-white"
             }`}
           />
         ))}

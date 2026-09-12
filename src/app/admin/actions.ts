@@ -47,19 +47,25 @@ export async function addGame(formData: FormData) {
   const is_championship = formData.get("is_championship") === "on";
   const referee = formData.get("referee") as string || null;
   const highlight_player = formData.get("highlight_player") as string || null;
-  const opponent_goals = parseInt(formData.get("opponent_goals") as string) || 0;
-  
   const goalsPlayersStr = formData.get("goals_players") as string;
+  const ownGoalsPlayersStr = formData.get("own_goals_players") as string;
   const yellowCardsPlayersStr = formData.get("yellow_cards_players") as string;
   const redCardsPlayersStr = formData.get("red_cards_players") as string;
+  const opponentGoalsScorersStr = formData.get("opponent_goals_scorers") as string;
   
   let goals_players: string[] = [];
+  let own_goals_players: string[] = [];
   let yellow_cards_players: string[] = [];
   let red_cards_players: string[] = [];
+  let opponent_goals_scorers: string[] = [];
   
   try { goals_players = JSON.parse(goalsPlayersStr || "[]"); } catch {}
+  try { own_goals_players = JSON.parse(ownGoalsPlayersStr || "[]"); } catch {}
   try { yellow_cards_players = JSON.parse(yellowCardsPlayersStr || "[]"); } catch {}
   try { red_cards_players = JSON.parse(redCardsPlayersStr || "[]"); } catch {}
+  try { opponent_goals_scorers = JSON.parse(opponentGoalsScorersStr || "[]"); } catch {}
+
+  const opponent_goals = opponent_goals_scorers.filter(Boolean).length + own_goals_players.length;
 
   const yellow_cards_count = yellow_cards_players.length;
   const red_cards_count = red_cards_players.length;
@@ -87,6 +93,8 @@ export async function addGame(formData: FormData) {
     yellow_cards_count,
     red_cards_count,
     goals_players,
+    own_goals_players,
+    opponent_goals_scorers,
     yellow_cards_players,
     red_cards_players
   }]).select().single();
@@ -97,6 +105,7 @@ export async function addGame(formData: FormData) {
     const redCol = is_championship ? 'champ_red_cards' : 'red_cards';
 
     await changePlayerStats(supabase, goals_players, goalsCol, 1);
+    await changePlayerStats(supabase, own_goals_players, goalsCol, -1);
     await changePlayerStats(supabase, yellow_cards_players, yellowCol, 1);
     await changePlayerStats(supabase, red_cards_players, redCol, 1);
   }
@@ -124,19 +133,25 @@ export async function updateGame(id: string, formData: FormData) {
   const is_championship = formData.get("is_championship") === "on";
   const referee = formData.get("referee") as string || null;
   const highlight_player = formData.get("highlight_player") as string || null;
-  const opponent_goals = parseInt(formData.get("opponent_goals") as string) || 0;
-  
   const goalsPlayersStr = formData.get("goals_players") as string;
+  const ownGoalsPlayersStr = formData.get("own_goals_players") as string;
   const yellowCardsPlayersStr = formData.get("yellow_cards_players") as string;
   const redCardsPlayersStr = formData.get("red_cards_players") as string;
+  const opponentGoalsScorersStr = formData.get("opponent_goals_scorers") as string;
   
   let goals_players: string[] = [];
+  let own_goals_players: string[] = [];
   let yellow_cards_players: string[] = [];
   let red_cards_players: string[] = [];
+  let opponent_goals_scorers: string[] = [];
   
   try { goals_players = JSON.parse(goalsPlayersStr || "[]"); } catch {}
+  try { own_goals_players = JSON.parse(ownGoalsPlayersStr || "[]"); } catch {}
   try { yellow_cards_players = JSON.parse(yellowCardsPlayersStr || "[]"); } catch {}
   try { red_cards_players = JSON.parse(redCardsPlayersStr || "[]"); } catch {}
+  try { opponent_goals_scorers = JSON.parse(opponentGoalsScorersStr || "[]"); } catch {}
+
+  const opponent_goals = opponent_goals_scorers.filter(Boolean).length + own_goals_players.length;
 
   const yellow_cards_count = yellow_cards_players.length;
   const red_cards_count = red_cards_players.length;
@@ -151,7 +166,7 @@ export async function updateGame(id: string, formData: FormData) {
   }
   
   // Buscar o jogo antigo para reverter as estatísticas
-  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players, is_championship").eq("id", id).single();
+  const { data: oldGame } = await supabase.from("games").select("goals_players, own_goals_players, yellow_cards_players, red_cards_players, is_championship").eq("id", id).single();
   
   if (oldGame) {
     const oldGoalsCol = oldGame.is_championship ? 'champ_goals' : 'goals';
@@ -159,6 +174,7 @@ export async function updateGame(id: string, formData: FormData) {
     const oldRedCol = oldGame.is_championship ? 'champ_red_cards' : 'red_cards';
 
     await changePlayerStats(supabase, oldGame.goals_players || [], oldGoalsCol, -1);
+    await changePlayerStats(supabase, oldGame.own_goals_players || [], oldGoalsCol, +1);
     await changePlayerStats(supabase, oldGame.yellow_cards_players || [], oldYellowCol, -1);
     await changePlayerStats(supabase, oldGame.red_cards_players || [], oldRedCol, -1);
   }
@@ -177,6 +193,8 @@ export async function updateGame(id: string, formData: FormData) {
     yellow_cards_count,
     red_cards_count,
     goals_players,
+    own_goals_players,
+    opponent_goals_scorers,
     yellow_cards_players,
     red_cards_players
   }).eq("id", id).select().single();
@@ -195,6 +213,7 @@ export async function updateGame(id: string, formData: FormData) {
   const redCol = is_championship ? 'champ_red_cards' : 'red_cards';
 
   await changePlayerStats(supabase, goals_players, goalsCol, 1);
+  await changePlayerStats(supabase, own_goals_players, goalsCol, -1);
   await changePlayerStats(supabase, yellow_cards_players, yellowCol, 1);
   await changePlayerStats(supabase, red_cards_players, redCol, 1);
 
@@ -203,7 +222,7 @@ export async function updateGame(id: string, formData: FormData) {
 
 export async function deleteGame(id: string) {
   const supabase = await createClient();
-  const { data: oldGame } = await supabase.from("games").select("goals_players, yellow_cards_players, red_cards_players, is_championship").eq("id", id).single();
+  const { data: oldGame } = await supabase.from("games").select("goals_players, own_goals_players, yellow_cards_players, red_cards_players, is_championship").eq("id", id).single();
   
   if (oldGame) {
     const goalsCol = oldGame.is_championship ? 'champ_goals' : 'goals';
@@ -211,6 +230,7 @@ export async function deleteGame(id: string) {
     const redCol = oldGame.is_championship ? 'champ_red_cards' : 'red_cards';
 
     await changePlayerStats(supabase, oldGame.goals_players || [], goalsCol, -1);
+    await changePlayerStats(supabase, oldGame.own_goals_players || [], goalsCol, +1);
     await changePlayerStats(supabase, oldGame.yellow_cards_players || [], yellowCol, -1);
     await changePlayerStats(supabase, oldGame.red_cards_players || [], redCol, -1);
   }
