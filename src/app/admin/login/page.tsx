@@ -9,7 +9,8 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const hasError = params?.error === "true";
-  
+  const isRateLimited = params?.error === "ratelimit";
+
   const headersList = await headers();
   const host = headersList.get("host") || "";
   
@@ -26,6 +27,11 @@ export default async function LoginPage({
         {hasError && (
           <div className="bg-red-50 text-red-500 p-3 rounded mb-4 text-sm text-center border border-red-200">
             Credenciais inválidas.
+          </div>
+        )}
+        {isRateLimited && (
+          <div className="bg-yellow-50 text-yellow-700 p-3 rounded mb-4 text-sm text-center border border-yellow-200">
+            Muitas tentativas de login. Aguarde alguns minutos e tente novamente.
           </div>
         )}
         <form action={login} className="space-y-4">

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { checkRateLimit, resetRateLimit } from "@/utils/rate-limit";
+import { getClientIp } from "@/utils/get-client-ip";
 
 async function getIsAdminDomain() {
   const headersList = await headers();
@@ -11,11 +13,22 @@ async function getIsAdminDomain() {
   return host.startsWith("admin.");
 }
 
+const LOGIN_RATE_LIMIT = 10;
+const LOGIN_RATE_WINDOW_MS = 20 * 60 * 1000; // 20 minutos
+
 export async function login(formData: FormData) {
+  const ip = await getClientIp();
+  const rateLimitKey = `admin-login:${ip}`;
+
+  const { allowed } = checkRateLimit(rateLimitKey, LOGIN_RATE_LIMIT, LOGIN_RATE_WINDOW_MS);
+  if (!allowed) {
+    redirect("/admin/login?error=ratelimit");
+  }
+
   const supabase = await createClient();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  
+
   const isAdminDomain = await getIsAdminDomain();
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -27,6 +40,7 @@ export async function login(formData: FormData) {
     redirect("/admin/login?error=true");
   }
 
+  resetRateLimit(rateLimitKey);
   revalidatePath("/", "layout");
   redirect("/admin");
 }
