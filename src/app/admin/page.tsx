@@ -4,8 +4,8 @@ import {
   logout,
   addPlayer,
   addDirector,
-  addStaff,
   addSponsor,
+  addInventoryItem,
 } from "./actions";
 import {
   LogOut,
@@ -15,12 +15,14 @@ import {
   ClipboardList,
   MonitorPlay,
   Wallet,
+  Archive,
 } from "lucide-react";
 import { GameRow } from "./components/GameRow";
 import { PlayerRow } from "./components/PlayerRow";
 import { DirectorRow } from "./components/DirectorRow";
 import { StaffRow } from "./components/StaffRow";
 import { SponsorRow } from "./components/SponsorRow";
+import { InventoryRow } from "./components/InventoryRow";
 import { LocationInput } from "./components/LocationInput";
 import { SearchFilter } from "./components/SearchFilter";
 import { GameEventsEditor } from "./components/GameEventsEditor";
@@ -72,6 +74,11 @@ export default async function AdminPage(props: {
     .from("championship_standings")
     .select("*");
 
+  let { data: inventory } = await supabase
+    .from("inventory")
+    .select("*")
+    .order("description", { ascending: true });
+
   let standings = standingsData || [];
 
   if (games) {
@@ -107,10 +114,10 @@ export default async function AdminPage(props: {
       directors = directors.filter((d: any) =>
         d.name.toLowerCase().includes(q),
       );
-    if (staff)
-      staff = staff.filter((s: any) => s.name.toLowerCase().includes(q));
     if (sponsors)
       sponsors = sponsors.filter((s: any) => s.name.toLowerCase().includes(q));
+    if (inventory)
+      inventory = inventory.filter((i: any) => i.description.toLowerCase().includes(q));
   }
 
   return (
@@ -174,6 +181,12 @@ export default async function AdminPage(props: {
           >
             <Wallet size={18} /> Financeiro
           </a>
+          <a
+            href="?tab=patrimonio"
+            className={`flex items-center gap-2 px-4 md:px-6 py-3 font-semibold uppercase tracking-wider text-sm transition-colors whitespace-nowrap ${currentTab === "patrimonio" ? "border-b-2 border-[#0074D9] text-[#0074D9]" : "text-gray-500 hover:text-gray-800"}`}
+          >
+            <Archive size={18} /> Patrimônio
+          </a>
         </div>
       </div>
 
@@ -183,6 +196,80 @@ export default async function AdminPage(props: {
           <div className="lg:col-span-3">
             <ClassificacaoTab standings={standings || []} />
           </div>
+        )}
+
+        {/* ABA PATRIMÔNIO */}
+        {currentTab === "patrimonio" && (
+          <>
+            <div className="lg:col-span-1">
+              <details className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 group lg:open">
+                <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
+                  Adicionar Item
+                  <span className="transition group-open:rotate-180">
+                    <svg fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
+                <form action={addInventoryItem} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Descrição</label>
+                    <input type="text" name="description" required className="w-full p-2 border rounded" placeholder="Ex: Bolas da Penalty" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Quantidade</label>
+                    <input type="number" name="quantity" required defaultValue="1" className="w-full p-2 border rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Valor Unitário (R$)</label>
+                    <input type="number" step="0.01" name="value" className="w-full p-2 border rounded" placeholder="Ex: 150.00" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Aos cuidados de</label>
+                    <input type="text" name="in_care_of" className="w-full p-2 border rounded" placeholder="Ex: João" />
+                  </div>
+                  <button type="submit" className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors">
+                    Salvar Item
+                  </button>
+                </form>
+              </details>
+            </div>
+            <div className="lg:col-span-2">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 border-b pb-2 gap-2">
+                  <h2 className="text-lg font-bold text-[#001f3f]">
+                    Itens Cadastrados ({inventory?.length || 0})
+                  </h2>
+                  <div className="w-full sm:w-64">
+                    <SearchFilter placeholder="Buscar item..." />
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-100 text-sm uppercase text-gray-600">
+                      <tr>
+                        <th className="p-3">Descrição</th>
+                        <th className="p-3 text-center">Quantidade</th>
+                        <th className="p-3 text-center">Valor (R$)</th>
+                        <th className="p-3 text-center">Cuidados de</th>
+                        <th className="p-3 text-center">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {(!inventory || inventory.length === 0) && (
+                        <tr>
+                          <td colSpan={5} className="p-4 text-center text-gray-500">
+                            Nenhum item cadastrado.
+                          </td>
+                        </tr>
+                      )}
+                      {inventory?.map((item: any) => (
+                        <InventoryRow key={item.id} item={item} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         {/* ABA JOGOS */}

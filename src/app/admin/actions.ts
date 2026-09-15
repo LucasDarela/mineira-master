@@ -513,3 +513,35 @@ export async function deleteStanding(id: string) {
   await supabase.from("championship_standings").delete().eq("id", id);
   revalidatePath("/", "layout");
 }
+
+// ==== PATRIMÔNIO ====
+
+export async function addInventoryItem(formData: FormData) {
+  const supabase = await createClient();
+  const description = formData.get("description") as string;
+  const quantity = parseInt(formData.get("quantity") as string || "1", 10);
+  const valueStr = formData.get("value") as string;
+  const value = valueStr ? parseFloat(valueStr) : null;
+  const in_care_of = formData.get("in_care_of") as string || null;
+  
+  await supabase.from("inventory").insert([{ description, quantity, value, in_care_of }]);
+  revalidatePath("/", "layout");
+}
+
+export async function updateInventoryItem(id: string, formData: FormData) {
+  const supabase = await createClient();
+  const description = formData.get("description") as string;
+  const quantity = parseInt(formData.get("quantity") as string || "1", 10);
+  const valueStr = formData.get("value") as string;
+  const value = valueStr ? parseFloat(valueStr) : null;
+  const in_care_of = formData.get("in_care_of") as string || null;
+  
+  await supabase.from("inventory").update({ description, quantity, value, in_care_of }).eq("id", id);
+  revalidatePath("/", "layout");
+}
+
+export async function deleteInventoryItem(id: string) {
+  const supabase = await createClient();
+  await supabase.from("inventory").delete().eq("id", id);
+  revalidatePath("/", "layout");
+}
