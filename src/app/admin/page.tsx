@@ -6,6 +6,7 @@ import {
   addDirector,
   addSponsor,
   addInventoryItem,
+  addStaff,
 } from "./actions";
 import {
   LogOut,
