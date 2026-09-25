@@ -118,14 +118,16 @@ export default async function AdminPage(props: {
     if (sponsors)
       sponsors = sponsors.filter((s: any) => s.name.toLowerCase().includes(q));
     if (inventory)
-      inventory = inventory.filter((i: any) => i.description.toLowerCase().includes(q));
+      inventory = inventory.filter((i: any) =>
+        i.description.toLowerCase().includes(q),
+      );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 text-black">
       <header className="bg-[#001f3f] text-white p-4 shadow-md flex justify-between items-center">
         <h1 className="text-xl font-bold uppercase">
-          Administração - Mineira Master
+          Administração - Mineira Master Futebol Clube
         </h1>
         <form action={logout}>
           <button
@@ -207,27 +209,72 @@ export default async function AdminPage(props: {
                 <summary className="text-lg font-bold text-[#001f3f] cursor-pointer outline-none flex justify-between items-center list-none border-b pb-2 mb-4">
                   Adicionar Item
                   <span className="transition group-open:rotate-180">
-                    <svg fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                    <svg
+                      fill="none"
+                      height="24"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path d="M6 9l6 6 6-6"></path>
+                    </svg>
                   </span>
                 </summary>
                 <form action={addInventoryItem} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Descrição</label>
-                    <input type="text" name="description" required className="w-full p-2 border rounded" placeholder="Ex: Bolas da Penalty" />
+                    <label className="block text-sm font-medium mb-1">
+                      Descrição
+                    </label>
+                    <input
+                      type="text"
+                      name="description"
+                      required
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: Bolas da Penalty"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Quantidade</label>
-                    <input type="number" name="quantity" required defaultValue="1" className="w-full p-2 border rounded" />
+                    <label className="block text-sm font-medium mb-1">
+                      Quantidade
+                    </label>
+                    <input
+                      type="number"
+                      name="quantity"
+                      required
+                      defaultValue="1"
+                      className="w-full p-2 border rounded"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Valor Unitário (R$)</label>
-                    <input type="number" step="0.01" name="value" className="w-full p-2 border rounded" placeholder="Ex: 150.00" />
+                    <label className="block text-sm font-medium mb-1">
+                      Valor Unitário (R$)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="value"
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: 150.00"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Aos cuidados de</label>
-                    <input type="text" name="in_care_of" className="w-full p-2 border rounded" placeholder="Ex: João" />
+                    <label className="block text-sm font-medium mb-1">
+                      Aos cuidados de
+                    </label>
+                    <input
+                      type="text"
+                      name="in_care_of"
+                      className="w-full p-2 border rounded"
+                      placeholder="Ex: João"
+                    />
                   </div>
-                  <button type="submit" className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#001f3f] hover:bg-[#0074D9] text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
                     Salvar Item
                   </button>
                 </form>
@@ -257,7 +304,10 @@ export default async function AdminPage(props: {
                     <tbody className="divide-y divide-gray-100">
                       {(!inventory || inventory.length === 0) && (
                         <tr>
-                          <td colSpan={5} className="p-4 text-center text-gray-500">
+                          <td
+                            colSpan={5}
+                            className="p-4 text-center text-gray-500"
+                          >
                             Nenhum item cadastrado.
                           </td>
                         </tr>
