@@ -1,0 +1,44 @@
+# Coloque este arquivo em /opt/mineira/ na VPS
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: mineira-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mineira
+      POSTGRES_USER: mineira
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro   # roda só na 1a vez (banco vazio)
+    networks: [interna]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mineira -d mineira"]
+      interval: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits: { memory: 384m }
+
+  app:
+    build: ./app
+    image: mineira-app
+    container_name: mineira-app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://mineira:${DB_PASSWORD}@db:5432/mineira
+      SESSION_SECRET: ${SESSION_SECRET}
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [interna, proxy]
+    deploy:
+      resources:
+        limits: { memory: 512m }
+
+networks:
+  interna:
+    internal: true   # banco sem acesso à internet e sem porta exposta
+  proxy:
+    external: true   # rede do Nginx Proxy Manager

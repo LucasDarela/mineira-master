@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+// Páginas leem o banco a cada acesso (o banco só existe em runtime na VPS, não no build)
+export const dynamic = "force-dynamic";
 import { SplashScreen } from "@/components/SplashScreen";
 import { ScrollToTop } from "@/components/ScrollToTop";
 
